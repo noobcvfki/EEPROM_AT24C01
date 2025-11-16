@@ -1,0 +1,8 @@
+//
+// Created by capting on 2025/11/16.
+//
+
+#ifndef USER_MPUXXX_MPUXXX_DRIVER_H
+#define USER_MPUXXX_MPUXXX_DRIVER_H
+
+#endif //USER_MPUXXX_MPUXXX_DRIVER_H
