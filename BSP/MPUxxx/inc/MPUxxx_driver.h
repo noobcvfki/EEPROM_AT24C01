@@ -100,8 +100,58 @@ typedef struct
     mpuxxx_status_t (*os_queue_get) (void *   const queue_handle,
                                      void *   const item,
                                      uint32_t const timeout);
+    mpuxxx_status_t (*os_queue_delete)(void * const queue_handle);
+    mpuxxx_status_t (*os_semaphore_create_mutex) (void **mutex_handle);
+    mpuxxx_status_t (*os_semaphore_delete_mutex) (void * const mutex_handle);
+    mpuxxx_status_t (*os_semaphore_lock_mutex)   (void * const mutex_handle);
+    mpuxxx_status_t (*os_semaphore_unlock_mutex) (void * const mutex_handle);
+
+    mpuxxx_status_t (*os_semaphore_create_binary) (void **binary_handle);
+    mpuxxx_status_t (*os_semaphore_delete_binary) (void * const binary_handle);
+    mpuxxx_status_t (*os_semaphore_wait_binary)   (void * const binary_handle);
+    mpuxxx_status_t (*os_semaphore_signal_binary) (void * const binary_handle);
+    mpuxxx_status_t (*os_semaphore_signal_binary_isr) (void * const binary_handle,
+                                                       long * const HigherPriorityTaskWoken);
+
+    mpuxxx_status_t (*os_semaphore_signal_notify_isr) ( void * const notify_handle,
+                                                    uint32_t ulValue,
+                                                    uint32_t eAction,
+                                                    long * const HigherPriorityTaskWoken);
+    mpuxxx_status_t (*os_semaphore_wait_notify)   ( uint32_t ulBitsToClearOnEntry,
+                                                    uint32_t ulBitsToClearOnExit,
+                                                    uint32_t *pulNotificationValue,
+                                                    uint32_t timeout);
 }os_interface_t;
 
+/* mpu6050 data format */
+typedef struct
+{
+    /* Raw accelerometer data from sensor */
+    int16_t accel_x_raw;
+    int16_t accel_y_raw;
+    int16_t accel_z_raw;
 
+    /* Processed accelerometer data in g units */
+    double ax;
+    double ay;
+    double az;
+
+    /* Raw gyroscope data from sensor */
+    int16_t gyro_x_raw;
+    int16_t gyro_y_raw;
+    int16_t gyro_z_raw;
+
+    /* Processed gyroscope data in degrees/s */
+    double gx;
+    double gy;
+    double gz;
+
+    /* Temperature reading in degrees Celsius */
+    float temperature;
+
+    /* Kalman filter processed angles */
+    double kalman_angle_x;
+    double kalman_angle_y;
+} mpuxxx_data_t;
 
 #endif //USER_MPUXXX_MPUXXX_DRIVER_H
