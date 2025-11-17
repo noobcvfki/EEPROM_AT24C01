@@ -91,7 +91,17 @@ typedef struct
     mpuxxx_status_t (*os_queue_create)(const uint32_t num ,
                                        const uint32_t size,
                                 void** const queue_handle );
-    mpuxxx_status_t (*os_queue_put)(void * const queue_handle)
+    mpuxxx_status_t (*os_queue_put)(void* const queue_handle,
+                                    void* const item,
+                              const uint32_t    timeout);
+    mpuxxx_status_t (*os_queue_put_isr)(void * const queue_handle,
+                                        void * const item,
+                                        long * pxHigherPriorityTaskWoken);
+    mpuxxx_status_t (*os_queue_get) (void *   const queue_handle,
+                                     void *   const item,
+                                     uint32_t const timeout);
 }os_interface_t;
+
+
 
 #endif //USER_MPUXXX_MPUXXX_DRIVER_H
