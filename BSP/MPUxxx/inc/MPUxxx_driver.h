@@ -154,4 +154,91 @@ typedef struct
     double kalman_angle_y;
 } mpuxxx_data_t;
 
+/*     Driver structure              */
+typedef struct bsp_mpuxxx_driver
+{
+    /* Core Layer */
+    iic_driver_interface_t         *p_iic_driver_interface;
+    hardware_interrupt_interface_t *p_interrupt_interface;
+    delay_interface_t              *p_delay_interface;
+    timebase_interface_t           *p_timebase_interface;
+
+    /* OS Layer  */
+#ifdef OS_SUPPORTING
+    yield_interface_t  *p_yield_interface;
+    os_interface_t     *p_os_interface;
+    buffer_interface_t *p_buffer_interface;
+
+    void *queue_handle;
+    void *semaphore_mutex_handle;
+    void *semaphore_binary_handle;
+    void *notify_handle;
+
+    void (*pf_dma_completed_callback)(void);
+    void (*pf_int_interrupt_callback)(void);
+#endif /* End of OS_SUPPORTING */
+
+    /* Interface of mpuxxx driver    */
+    mpuxxx_status_t (*pf_deinit)              (struct bsp_mpuxxx_driver *);
+    mpuxxx_status_t (*pf_sleep)               (struct bsp_mpuxxx_driver *);
+    mpuxxx_status_t (*pf_wakeup)              (struct bsp_mpuxxx_driver *);
+    mpuxxx_status_t (*pf_set_gyro_fsr)        (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_accel_fsr)       (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_lpf)             (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_rate)            (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_interrupt_enable)(struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_motion_threshold)(struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_INT_level)       (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_user_ctrl)       (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_pwr_mgmt1_reg)   (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_pwr_mgmt2_reg)   (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_set_fifo_en_reg)     (struct bsp_mpuxxx_driver *, uint8_t);
+    mpuxxx_status_t (*pf_get_temperature)     (struct bsp_mpuxxx_driver *, mpuxxx_data_t *);
+    mpuxxx_status_t (*pf_get_accel)           (struct bsp_mpuxxx_driver *, mpuxxx_data_t *);
+    mpuxxx_status_t (*pf_get_gyro)            (struct bsp_mpuxxx_driver *, mpuxxx_data_t *);
+    mpuxxx_status_t (*pf_get_all_data)        (struct bsp_mpuxxx_driver *, mpuxxx_data_t *);
+    mpuxxx_status_t (*pf_get_interrupt_status_reg)(struct bsp_mpuxxx_driver *, uint8_t *);
+    mpuxxx_status_t (*pf_read_fifo_packet)    (struct bsp_mpuxxx_driver *p_mpu_driver,
+                                                                           mpuxxx_data_t *p_data);
+    mpuxxx_status_t (*pf_read_fifo_isr_occur) (struct bsp_mpuxxx_driver *p_mpu_driver,
+                                                                           mpuxxx_data_t *p_data);
+} bsp_mpuxxx_driver_t;
+
+//******************************** Functions ********************************//
+/**
+ * @brief Initialize the MPU6050 driver instance with the provided interfaces
+ *        and callbacks
+ *
+ * @param p_mpuxxx_driver Pointer to the MPU6050 driver structure to initialize
+ * @param p_iic_driver_interface Pointer to the IIC driver interface implementation
+ * @param p_yield_interface      Pointer to the yield interface (OS mode only)
+ * @param p_os_interfece         Pointer to the OS interface (OS mode only)
+ * @param p_timebase_interface   Pointer to the timebase interface
+ * @param callback_register      Function to register interrupt callback
+ * @param callback_register_dma  Function to register DMA callback
+ * @param queue_handle           Handle to queue for data transfer (OS mode only)
+ *
+ * @return MPU6050_OK if successful, error code otherwise
+ *
+*/
+mpuxxx_status_t bsp_mpuxxx_driver_inst(
+                bsp_mpuxxx_driver_t    *p_mpuxxx_driver,
+                iic_driver_interface_t *p_iic_driver_interface,
+
+                yield_interface_t      *p_yield_interface,
+                os_interface_t         *p_os_interfece,
+
+                delay_interface_t      *p_delay_interface,
+                timebase_interface_t   *p_timebase_interface,
+                void (*callback_register)    (void (*callback)(void *, void *)),
+                void (*callback_register_dma)(void (*callback)(void *, void *))
+
+                ,void *queue_handle,
+                void *semaphore_handle,
+                void *notify_handle
+                 );
+
+
+uint32_t mpuxxx_flag_read(void);
+void mpuxxx_flag_set(uint8_t flag);
 #endif //USER_MPUXXX_MPUXXX_DRIVER_H
