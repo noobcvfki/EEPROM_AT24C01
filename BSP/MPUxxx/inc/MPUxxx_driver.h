@@ -116,17 +116,20 @@ typedef struct
     mpuxxx_status_t (*os_semaphore_delete_binary) (void * const binary_handle);
     mpuxxx_status_t (*os_semaphore_wait_binary)   (void * const binary_handle);
     mpuxxx_status_t (*os_semaphore_signal_binary) (void * const binary_handle);
-    mpuxxx_status_t (*os_semaphore_signal_binary_isr) (void * const binary_handle,
-                                                       long * const HigherPriorityTaskWoken);
+    mpuxxx_status_t (*os_semaphore_signal_binary_isr)
+                                        (void * const binary_handle,
+                                         long * const HigherPriorityTaskWoken);
 
-    mpuxxx_status_t (*os_semaphore_signal_notify_isr) ( void * const notify_handle,
-                                                    uint32_t ulValue,
-                                                    uint32_t eAction,
-                                                    long * const HigherPriorityTaskWoken);
-    mpuxxx_status_t (*os_semaphore_wait_notify)   ( uint32_t ulBitsToClearOnEntry,
-                                                    uint32_t ulBitsToClearOnExit,
-                                                    uint32_t *pulNotificationValue,
-                                                    uint32_t timeout);
+    mpuxxx_status_t (*os_semaphore_signal_notify_isr)
+                                        (void * const notify_handle,
+                                         uint32_t     ulValue,
+                                         uint32_t     eAction,
+                                         long * const HigherPriorityTaskWoken);
+    mpuxxx_status_t (*os_semaphore_wait_notify)
+                                              (uint32_t ulBitsToClearOnEntry,
+                                               uint32_t ulBitsToClearOnExit,
+                                               uint32_t *pulNotificationValue,
+                                               uint32_t timeout);
 }os_interface_t;
 
 /* mpu6050 data format */

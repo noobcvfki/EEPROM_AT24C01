@@ -3,3 +3,4 @@
 //
 
 #include "MPUxxx_driver.h"
+#include "bsp_mpu6050_reg.h"
