@@ -6,6 +6,9 @@
 #define USER_MPUXXX_MPUXXX_DRIVER_H
 //******************************** Includes *********************************//
 #include <stdint.h>
+//******************************** Includes *********************************//
+//---------------------------------------------------------------------------//
+//******************************** define   *********************************//
 /*   函数返回值    */
 typedef enum
 {
@@ -19,6 +22,9 @@ typedef enum
     MPUxxx_RESERVED       = 0x7FFFFFFF, /*Reserved                           */
 } mpuxxx_status_t;
 
+#define OS_SUPPORTING
+//******************************** define   *********************************//
+//---------------------------------------------------------------------------//
 /* HAL_硬件IIC    */
 typedef struct
 {
@@ -182,26 +188,45 @@ typedef struct bsp_mpuxxx_driver
     mpuxxx_status_t (*pf_deinit)              (struct bsp_mpuxxx_driver *);
     mpuxxx_status_t (*pf_sleep)               (struct bsp_mpuxxx_driver *);
     mpuxxx_status_t (*pf_wakeup)              (struct bsp_mpuxxx_driver *);
-    mpuxxx_status_t (*pf_set_gyro_fsr)        (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_accel_fsr)       (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_lpf)             (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_rate)            (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_interrupt_enable)(struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_motion_threshold)(struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_INT_level)       (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_user_ctrl)       (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_pwr_mgmt1_reg)   (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_pwr_mgmt2_reg)   (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_set_fifo_en_reg)     (struct bsp_mpuxxx_driver *, uint8_t);
-    mpuxxx_status_t (*pf_get_temperature)     (struct bsp_mpuxxx_driver *, mpuxxx_data_t *);
-    mpuxxx_status_t (*pf_get_accel)           (struct bsp_mpuxxx_driver *, mpuxxx_data_t *);
-    mpuxxx_status_t (*pf_get_gyro)            (struct bsp_mpuxxx_driver *, mpuxxx_data_t *);
-    mpuxxx_status_t (*pf_get_all_data)        (struct bsp_mpuxxx_driver *, mpuxxx_data_t *);
-    mpuxxx_status_t (*pf_get_interrupt_status_reg)(struct bsp_mpuxxx_driver *, uint8_t *);
-    mpuxxx_status_t (*pf_read_fifo_packet)    (struct bsp_mpuxxx_driver *p_mpu_driver,
-                                                                           mpuxxx_data_t *p_data);
-    mpuxxx_status_t (*pf_read_fifo_isr_occur) (struct bsp_mpuxxx_driver *p_mpu_driver,
-                                                                           mpuxxx_data_t *p_data);
+    mpuxxx_status_t (*pf_set_gyro_fsr)        (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_accel_fsr)       (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_lpf)             (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_rate)            (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_interrupt_enable)(struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_motion_threshold)(struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_INT_level)       (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_user_ctrl)       (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_pwr_mgmt1_reg)   (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_pwr_mgmt2_reg)   (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_set_fifo_en_reg)     (struct bsp_mpuxxx_driver *,
+                                                                      uint8_t);
+    mpuxxx_status_t (*pf_get_temperature)     (struct bsp_mpuxxx_driver *,
+                                                              mpuxxx_data_t *);
+    mpuxxx_status_t (*pf_get_accel)           (struct bsp_mpuxxx_driver *,
+                                                              mpuxxx_data_t *);
+    mpuxxx_status_t (*pf_get_gyro)            (struct bsp_mpuxxx_driver *,
+                                                              mpuxxx_data_t *);
+    mpuxxx_status_t (*pf_get_all_data)        (struct bsp_mpuxxx_driver *,
+                                                              mpuxxx_data_t *);
+    mpuxxx_status_t (*pf_get_interrupt_status_reg)
+                                              (struct bsp_mpuxxx_driver *,
+                                                                    uint8_t *);
+    mpuxxx_status_t
+             (*pf_read_fifo_packet)    (struct bsp_mpuxxx_driver *p_mpu_driver,
+                                                        mpuxxx_data_t *p_data);
+    mpuxxx_status_t (*pf_read_fifo_isr_occur)
+                                       (struct bsp_mpuxxx_driver *p_mpu_driver,
+                                                        mpuxxx_data_t *p_data);
 } bsp_mpuxxx_driver_t;
 
 //******************************** Functions ********************************//
@@ -230,10 +255,11 @@ mpuxxx_status_t bsp_mpuxxx_driver_inst(
 
                 delay_interface_t      *p_delay_interface,
                 timebase_interface_t   *p_timebase_interface,
-                void (*callback_register)    (void (*callback)(void *, void *)),
-                void (*callback_register_dma)(void (*callback)(void *, void *))
-
-                ,void *queue_handle,
+                void (*callback_register)    (void (*callback)
+                                               (void *, void *)),
+                void (*callback_register_dma)(void (*callback)
+                                               (void *, void *)),
+                void *queue_handle,
                 void *semaphore_handle,
                 void *notify_handle
                  );
