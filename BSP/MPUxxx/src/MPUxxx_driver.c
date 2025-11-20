@@ -84,28 +84,242 @@
 //******************************** Macros ***********************************//
 //---------------------------------------------------------------------------//
 //******************************* Functions *********************************//
-mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t* p_mpuxxx);
-mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t* p_mpuxxx);
-mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t* p_mpuxxx);
-mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t* p_mpuxxx);
-mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
-mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
-mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
-mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
-mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
-mpuxxx_status_t mpu_driver_get_interrupt_status_reg(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t* p_data);
-mpuxxx_status_t mpu_driver_read_fifo_packet(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
-mpuxxx_status_t mpu_driver_read_fifo_isr_occur(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
+/**
+ * @brief 初始化MPU驱动
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
+{
+}
+
+/**
+ * @brief 反初始化MPU驱动
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t *p_mpuxxx)
+{
+}
+
+/**
+ * @brief 使MPU进入睡眠模式
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t *p_mpuxxx)
+{
+}
+
+/**
+ * @brief 唤醒MPU
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
+{
+}
+
+/**
+ * @brief 设置陀螺仪满量程范围
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 陀螺仪满量程设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                     uint8_t data)
+{
+}
+
+/**
+ * @brief 设置加速度计满量程范围
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 加速度计满量程设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                      uint8_t data)
+{
+}
+
+/**
+ * @brief 设置低通滤波器
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 低通滤波器设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                uint8_t data)
+{
+}
+
+/**
+ * @brief 设置采样率
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 采样率设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                 uint8_t data)
+{
+}
+
+/**
+ * @brief 设置中断使能
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 中断使能设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                             uint8_t data)
+{
+}
+
+/**
+ * @brief 设置运动检测阈值
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 运动检测阈值设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                             uint8_t data)
+{
+}
+
+/**
+ * @brief 设置中断电平
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 中断电平设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                      uint8_t data)
+{
+}
+
+/**
+ * @brief 设置用户控制寄存器
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 用户控制设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                      uint8_t data)
+{
+}
+
+/**
+ * @brief 设置电源管理1寄存器
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 电源管理1设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                          uint8_t data)
+{
+}
+
+/**
+ * @brief 设置电源管理2寄存器
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data 电源管理2设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                          uint8_t data)
+{
+}
+
+/**
+ * @brief 设置FIFO使能寄存器
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @param[in] data FIFO使能设置值
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                        uint8_t data)
+{
+}
+
+/**
+ * @brief 获取温度数据
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @param[out] p_data 温度数据输出指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                 mpuxxx_data_t *p_data)
+{
+}
+
+/**
+ * @brief 获取加速度计数据
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @param[out] p_data 加速度计数据输出指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                           mpuxxx_data_t *p_data)
+{
+}
+
+/**
+ * @brief 获取陀螺仪数据
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @param[out] p_data 陀螺仪数据输出指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                          mpuxxx_data_t *p_data)
+{
+}
+
+/**
+ * @brief 获取所有传感器数据
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @param[out] p_data 所有传感器数据输出指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                              mpuxxx_data_t *p_data)
+{
+}
+
+/**
+ * @brief 获取中断状态寄存器值
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @param[out] p_data 中断状态寄存器值输出指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_get_interrupt_status_reg(
+                                       bsp_mpuxxx_driver_t *p_mpuxxx,
+                                       uint8_t             *p_data)
+{
+}
+
+/**
+ * @brief 读取FIFO数据包
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @param[out] p_data FIFO数据输出指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_read_fifo_packet(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                            mpuxxx_data_t       *p_data)
+{
+}
+
+/**
+ * @brief 在ISR中读取FIFO数据
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @param[out] p_data FIFO数据输出指针
+ * @return 执行状态
+ */
+mpuxxx_status_t mpu_driver_read_fifo_isr_occur(bsp_mpuxxx_driver_t *p_mpuxxx,
+                                               mpuxxx_data_t       *p_data)
+{
+}
+
+
 
 mpuxxx_status_t bsp_mpuxxx_driver_inst(
     bsp_mpuxxx_driver_t    *p_mpuxxx_driver,
