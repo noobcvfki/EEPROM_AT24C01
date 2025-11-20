@@ -115,6 +115,8 @@ static uint8_t g_is_init_flag = MPUXXX_NOT_INIT;
  */
 static mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
+    g_is_init_flag = MPUXXX_NOT_INIT;
+    return MPUxxx_OK;
 }
 
 /**
@@ -124,6 +126,8 @@ static mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t *p_mpuxxx)
  */
 static mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
+    g_is_init_flag = MPUXXX_INIT;
+    return MPUxxx_OK;
 }
 
 /**
@@ -224,14 +228,25 @@ static mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t *p_mpuxxx,
 }
 
 /**
- * @brief 设置采样率
+ * @brief 设置采样率，准确来说是SMPLRT_DIV
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 采样率设置值
+ *            采样率 = 陀螺仪输出速率/（1+data）
+ * 当DLPF禁用时（DLPF_CFG=0或7），陀螺仪输出速率=8kHz；当DLPF启用时，陀螺仪输出率=1kHz
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                  uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_SAMPLE_RATE_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("rate set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
