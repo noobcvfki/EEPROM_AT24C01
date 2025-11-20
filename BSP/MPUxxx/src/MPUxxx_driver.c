@@ -28,6 +28,7 @@
 //******************************** Includes *********************************//
 #include "MPUxxx_driver.h"
 #include "bsp_mpu6050_reg.h"
+#include "elog.h"
 //******************************** Includes *********************************//
 //---------------------------------------------------------------------------//
 //******************************** Defines **********************************//
@@ -66,14 +67,62 @@
 )
 
 #define DEBUG
+
 #ifdef DEBUG
 #define DEBUG_LOG(x)  log_d(x)
 #define NULL_CHECK(x,tag) do{\
     if(NULL == x){\
         log_e("discover null prt");\
-        goto tag\
+        goto tag;\
     }}while (0)
+#else
+#define DEBUG_LOG(x)        (0)
+#define NULL_CHECK(x,tag)   (0)
 #endif//end of DEBUG
 
 //******************************** Macros ***********************************//
 //---------------------------------------------------------------------------//
+
+
+mpuxxx_status_t bsp_mpuxxx_driver_inst(
+    bsp_mpuxxx_driver_t    *p_mpuxxx_driver,
+    iic_driver_interface_t *p_iic_driver_interface,
+#ifdef OS_SUPPORTING
+    yield_interface_t      *p_yield_interface,
+    os_interface_t         *p_os_interfece,
+#endif //OS_SUPPORTING
+    delay_interface_t      *p_delay_interface,
+    timebase_interface_t   *p_timebase_interface,
+    void                  (*callback_register)
+                           (void (*callback)(void *, void *)),
+    void                  (*callback_register_dma)
+                           (void (*callback)(void *, void *)),
+#ifdef OS_SUPPORTING
+    void                   *queue_handle,
+    void                   *semaphore_handle,
+    void                   *notify_handle)
+#endif//OS_SUPPORTING
+
+{
+    mpuxxx_status_t ret = MPUxxx_OK;
+    NULL_CHECK(p_mpuxxx_driver,       mpu_driver_inst_null);
+    NULL_CHECK(p_iic_driver_interface,mpu_driver_inst_null);
+#ifdef OS_SUPPORTING
+    NULL_CHECK(p_yield_interface,     mpu_driver_inst_null);
+    NULL_CHECK(p_os_interfece,        mpu_driver_inst_null);
+#endif //OS_SUPPORTING
+    NULL_CHECK(p_delay_interface,     mpu_driver_inst_null);
+    NULL_CHECK(p_timebase_interface,  mpu_driver_inst_null);
+    NULL_CHECK(callback_register,     mpu_driver_inst_null);
+    NULL_CHECK(callback_register_dma, mpu_driver_inst_null);
+#ifdef OS_SUPPORTING
+    NULL_CHECK(queue_handle,          mpu_driver_inst_null);
+    NULL_CHECK(semaphore_handle,      mpu_driver_inst_null);
+    NULL_CHECK(notify_handle,         mpu_driver_inst_null);
+#endif //OS_SUPPORTING
+mpu_driver_inst_null:
+    {
+        log_e("bsp_mpuxxx_driver_inst");
+        return MPUxxx_ERRORPARAMETER;
+    }
+}

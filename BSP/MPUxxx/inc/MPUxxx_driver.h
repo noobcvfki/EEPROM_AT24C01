@@ -87,6 +87,7 @@ typedef struct
     void (*pf_delay_ms)(const uint32_t);
 }delay_interface_t;
 
+#ifdef OS_SUPPORTING
 typedef struct
 {
     void (*pf_rtos_yield)  (const uint32_t);
@@ -131,7 +132,7 @@ typedef struct
                                                uint32_t *pulNotificationValue,
                                                uint32_t timeout);
 }os_interface_t;
-
+#endif //OS_SUPPORTING
 /* mpu6050 data format */
 typedef struct
 {
@@ -241,6 +242,7 @@ typedef struct bsp_mpuxxx_driver
  * @param p_iic_driver_interface Pointer to the IIC driver interface implementation
  * @param p_yield_interface      Pointer to the yield interface (OS mode only)
  * @param p_os_interfece         Pointer to the OS interface (OS mode only)
+ * @param p_delay_interface
  * @param p_timebase_interface   Pointer to the timebase interface
  * @param callback_register      Function to register interrupt callback
  * @param callback_register_dma  Function to register DMA callback
@@ -252,19 +254,21 @@ typedef struct bsp_mpuxxx_driver
 mpuxxx_status_t bsp_mpuxxx_driver_inst(
                 bsp_mpuxxx_driver_t    *p_mpuxxx_driver,
                 iic_driver_interface_t *p_iic_driver_interface,
-
+#ifdef OS_SUPPORTING
                 yield_interface_t      *p_yield_interface,
                 os_interface_t         *p_os_interfece,
-
+#endif //OS_SUPPORTING
                 delay_interface_t      *p_delay_interface,
                 timebase_interface_t   *p_timebase_interface,
                 void (*callback_register)    (void (*callback)
                                                (void *, void *)),
                 void (*callback_register_dma)(void (*callback)
                                                (void *, void *)),
+#ifdef OS_SUPPORTING
                 void *queue_handle,
                 void *semaphore_handle,
                 void *notify_handle
+#endif//OS_SUPPORTING
                  );
 
 
