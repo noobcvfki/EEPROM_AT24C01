@@ -84,6 +84,29 @@
 //******************************** Macros ***********************************//
 //---------------------------------------------------------------------------//
 //******************************* Functions *********************************//
+mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t* p_mpuxxx);
+mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t* p_mpuxxx);
+mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t* p_mpuxxx);
+mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t* p_mpuxxx);
+mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t data);
+mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
+mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
+mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
+mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
+mpuxxx_status_t mpu_driver_get_interrupt_status_reg(bsp_mpuxxx_driver_t* p_mpuxxx,uint8_t* p_data);
+mpuxxx_status_t mpu_driver_read_fifo_packet(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
+mpuxxx_status_t mpu_driver_read_fifo_isr_occur(bsp_mpuxxx_driver_t* p_mpuxxx,mpuxxx_data_t* p_data);
+
 mpuxxx_status_t bsp_mpuxxx_driver_inst(
     bsp_mpuxxx_driver_t    *p_mpuxxx_driver,
     iic_driver_interface_t *p_iic_driver_interface,
@@ -171,6 +194,34 @@ mpuxxx_status_t bsp_mpuxxx_driver_inst(
     NULL_CHECK(p_timebase_interface->pf_get_tick_count_ms,
                                                          mpu_driver_inst_null);
     p_mpuxxx_driver->p_timebase_interface = p_timebase_interface;
+    p_mpuxxx_driver->pf_deinit = mpu_driver_deinit;
+    p_mpuxxx_driver->pf_sleep = mpu_driver_sleep;
+    p_mpuxxx_driver->pf_wakeup = mpu_driver_wakeup;
+    p_mpuxxx_driver->pf_set_gyro_fsr = mpu_driver_set_gyro_fsr;
+    p_mpuxxx_driver->pf_set_accel_fsr = mpu_driver_set_accel_fsr;
+    p_mpuxxx_driver->pf_set_lpf = mpu_driver_set_lpf;
+    p_mpuxxx_driver->pf_set_rate = mpu_driver_set_rate;
+    p_mpuxxx_driver->pf_set_interrupt_enable = mpu_driver_set_interrupt_enable;
+    p_mpuxxx_driver->pf_set_motion_threshold = mpu_driver_set_motion_threshold;
+    p_mpuxxx_driver->pf_set_INT_level = mpu_driver_set_INT_level;
+    p_mpuxxx_driver->pf_set_user_ctrl = mpu_driver_set_user_ctrl;
+    p_mpuxxx_driver->pf_set_pwr_mgmt1_reg = mpu_driver_set_pwr_mgmt1_reg;
+    p_mpuxxx_driver->pf_set_pwr_mgmt2_reg = mpu_driver_set_pwr_mgmt2_reg;
+    p_mpuxxx_driver->pf_set_fifo_en_reg = mpu_driver_set_fifo_en_reg;
+    p_mpuxxx_driver->pf_get_temperature = mpu_driver_get_temperature;
+    p_mpuxxx_driver->pf_get_accel = mpu_driver_get_accel;
+    p_mpuxxx_driver->pf_get_gyro = mpu_driver_get_gyro;
+    p_mpuxxx_driver->pf_get_all_data = mpu_driver_get_all_data;
+    p_mpuxxx_driver->pf_get_interrupt_status_reg = mpu_driver_get_interrupt_status_reg;
+    p_mpuxxx_driver->pf_read_fifo_packet = mpu_driver_read_fifo_packet;
+    p_mpuxxx_driver->pf_read_fifo_isr_occur = mpu_driver_read_fifo_isr_occur;
+
+    p_mpuxxx_driver->queue_handle = queue_handle;
+    p_mpuxxx_driver->semaphore_binary_handle = semaphore_handle;
+    p_mpuxxx_driver->notify_handle = notify_handle;
+
+    ret = mpuxxx_driver_init(p_mpuxxx_driver);
+    if (MPUxxx_OK != ret){LOG_ERROR("mpu init is ng");return MPUxxx_ERROR;}
 mpu_driver_inst_null:
     {
         log_e("bsp_mpuxxx_driver_inst");

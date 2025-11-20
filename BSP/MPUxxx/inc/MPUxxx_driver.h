@@ -225,8 +225,8 @@ typedef struct bsp_mpuxxx_driver
     mpuxxx_status_t (*pf_get_interrupt_status_reg)
                                               (struct bsp_mpuxxx_driver *,
                                                                     uint8_t *);
-    mpuxxx_status_t
-             (*pf_read_fifo_packet)    (struct bsp_mpuxxx_driver *p_mpu_driver,
+    mpuxxx_status_t (*pf_read_fifo_packet)
+                                       (struct bsp_mpuxxx_driver *p_mpu_driver,
                                                         mpuxxx_data_t *p_data);
     mpuxxx_status_t (*pf_read_fifo_isr_occur)
                                        (struct bsp_mpuxxx_driver *p_mpu_driver,
@@ -247,6 +247,8 @@ typedef struct bsp_mpuxxx_driver
  * @param callback_register      Function to register interrupt callback
  * @param callback_register_dma  Function to register DMA callback
  * @param queue_handle           Handle to queue for data transfer (OS mode only)
+ * @param semaphore_handle
+ * @param notify_handle
  *
  * @return MPU6050_OK if successful, error code otherwise
  *
