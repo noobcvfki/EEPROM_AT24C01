@@ -521,7 +521,7 @@ static mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t *p_mpuxxx,
     p_data->gz = (double)(p_data->gyro_z_raw / g_gyro_scale);
     return ret;
 }
-//TODO：FIFO相关配置
+
 /**
  * @brief 获取中断状态寄存器值
  * @param[in] p_mpuxxx MPU驱动结构体指针
@@ -624,6 +624,41 @@ static mpuxxx_status_t mpu_driver_read_fifo_isr_occur(
     return ret;
 }
 
+/**
+ * @brief 运动中断触发初始化
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @return 执行状态
+ */
+static mpuxxx_status_t mpu_motion_init(bsp_mpuxxx_driver_t* p_mpuxxx)
+{
+    mpuxxx_status_t ret = MPUxxx_OK;
+
+    ret = mpu_driver_set_motion_threshold(p_mpuxxx,0x10);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("motion threshold set is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_INT_level(p_mpuxxx,0x90);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("INT level set is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_interrupt_enable(p_mpuxxx,0x40);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("INT enable set is ng");
+        return ret;
+    }
+    return ret;
+}
+
+/**
+ * @brief FIFO初始化
+ * @param[in] p_mpuxxx MPU驱动结构体指针
+ * @return 执行状态
+ */
 static mpuxxx_status_t mpuxxx_fifo_init(bsp_mpuxxx_driver_t* p_mpuxxx)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
