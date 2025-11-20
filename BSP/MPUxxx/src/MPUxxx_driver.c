@@ -253,7 +253,6 @@ static mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @brief 设置中断使能
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 中断使能设置值
- *|     |      陀螺仪
  *|data |    中断名称
  *|BIT0	| 控制数据准备中断
  *|BIT1	|     预留
@@ -321,6 +320,16 @@ static mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @brief 设置用户控制寄存器
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 用户控制设置值
+ * |---------------------------------------------------------------|
+ * |  BIT7     |    BIT6       |   BIT5        |    BIT4    | BIT3 |
+ * |-----------|---------------|---------------|------------|------|
+ * |   /       |  FIFO_EN      |I2C_MST_EN     | I2C_IF_DIS |  /   |
+ * |-----------|---------------|---------------|------------|------|
+ * |-----------|---------------|---------------|------------|------|
+ * |  BIT2     |    BIT1       |    BIT0       |            |      |
+ * |-----------|---------------|---------------|------------|------|
+ * |FIFO_RESET | I2C_MST_RESET |SIG_COND_RESET |            |      |
+ * |---------------------------------------------------------------|
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
@@ -378,6 +387,8 @@ static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxx
  * @brief 设置FIFO使能寄存器
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data FIFO使能设置值
+ * Bit7	Bit6	Bit5	Bit4	Bit3	Bit2	Bit1	Bit0
+ * 温度	陀螺仪X 陀螺仪Y  陀螺仪Z  加速度计  从设备 2  从设备1 从设备 0
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
@@ -531,6 +542,8 @@ static mpuxxx_status_t mpu_driver_get_interrupt_status_reg(
     return ret;
 }
 
+
+
 /**
  * @brief 读取FIFO数据包
  * @param[in] p_mpuxxx MPU驱动结构体指针
@@ -570,6 +583,45 @@ static mpuxxx_status_t mpu_driver_read_fifo_isr_occur(
     //     LOG_ERROR("read_fifo_isr set is ng");
     //     return ret;
     // }
+    return ret;
+}
+
+static mpuxxx_status_t mpuxxx_fifo_init(bsp_mpuxxx_driver_t* p_mpuxxx)
+{
+    mpuxxx_status_t ret = MPUxxx_OK;
+
+    //reset FIFO
+    ret = mpu_driver_set_user_ctrl(p_mpuxxx,(1<<2));
+    if (MPUxxx_OK!=ret)
+    {
+        LOG_ERROR("writer user ctrl is ng");
+        return ret;
+    }
+    //等待复位
+#ifdef OS_SUPPORTING
+    p_mpuxxx->p_yield_interface->pf_rtos_yield(10);
+#else
+    p_mpuxxx->p_delay_interface->pf_delay_ms(10);
+#endif
+    //启用加速度计和陀螺仪的FIFO
+    ret = mpu_driver_set_fifo_en_reg(p_mpuxxx,0x78);//0b0111 1000
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("mpu_write");
+        return ret;
+    }
+    ret = mpu_driver_set_INT_level(p_mpuxxx,0x90);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set INT level is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_interrupt_enable(p_mpuxxx,0x10); //0b0001 0000
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set interrupt enable is ng");
+        return ret;
+    }
     return ret;
 }
 
