@@ -84,8 +84,8 @@
 #define DEBUG
 
 #ifdef DEBUG
-#define LOG_DEBUG(x)  log_d(x)
-#define LOG_ERROR(x)  log_e(x)
+#define LOG_DEBUG(x,...)  log_d(x, ##__VA_ARGS__)
+#define LOG_ERROR(x,...)  log_e(x,##__VA_ARGS__)
 #else
 #define LOG_DEBUG(x)        ((void)0)
 #define LOG_ERROR(x)        ((void)0)
@@ -555,12 +555,50 @@ static mpuxxx_status_t mpu_driver_read_fifo_packet(
                                                      mpuxxx_data_t *p_data)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
-    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_MOTION_DET_REG, &data,1);
+    uint16_t fifo_count = 0;
+    uint16_t fifo_pack_count = 0;
+    uint8_t fifo_buffer[12] = {0};
+
+    ret = MPUXXX_READ_REG(p_mpuxxx,MPU_FIFO_CNTH_REG, fifo_buffer,2);
     if (MPUxxx_OK!= ret)
     {
-        LOG_ERROR("read_fifo set is ng");
+        LOG_ERROR("read_fifo_CNTH set is ng");
         return ret;
     }
+    fifo_count = (fifo_buffer[0]<<8)|fifo_buffer[1];
+    LOG_DEBUG("mpuxxx read fifo cnt is [%u]",fifo_count);
+
+    if (fifo_count>= 12)
+    {
+        fifo_pack_count = fifo_count / 12;
+        for (uint16_t i=0;i<fifo_pack_count;i++)
+        {
+            ret = MPUXXX_READ_REG(p_mpuxxx,MPU_FIFO_RW_REG,fifo_buffer,12);
+            if (MPUxxx_OK != ret)
+            {
+                LOG_ERROR("mpuxxx fifo read is ng");
+                return ret;
+            }
+            //拼接加速度数据
+            p_data[i].accel_x_raw=(int16_t)(fifo_buffer[0]<<8)|fifo_buffer[1];
+            p_data[i].accel_y_raw=(int16_t)(fifo_buffer[2]<<8)|fifo_buffer[3];
+            p_data[i].accel_z_raw=(int16_t)(fifo_buffer[4]<<8)|fifo_buffer[5];
+            //拼接陀螺仪数据
+            p_data[i].gyro_x_raw=(int16_t)(fifo_buffer[6]<<8)|fifo_buffer[7];
+            p_data[i].gyro_y_raw=(int16_t)(fifo_buffer[8]<<8)|fifo_buffer[9];
+            p_data[i].gyro_z_raw=(int16_t)(fifo_buffer[10]<<8)|fifo_buffer[11];
+
+            //转化为实际物理值
+            p_data[i].ax=(double)p_data[i].accel_x_raw/g_accel_scale;
+            p_data[i].ay=(double)p_data[i].accel_y_raw/g_accel_scale;
+            p_data[i].az=(double)p_data[i].accel_z_raw/g_accel_scale;
+
+            p_data[i].gx=(double)p_data[i].gyro_x_raw/g_gyro_scale;
+            p_data[i].gy=(double)p_data[i].gyro_y_raw/g_gyro_scale;
+            p_data[i].gz=(double)p_data[i].gyro_z_raw/g_gyro_scale;
+        }
+    }
+
     return ret;
 }
 
@@ -645,7 +683,6 @@ static mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
 static mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
-    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_MOTION_DET_REG, &data,1);
     if (MPUxxx_OK!= ret)
     {
         LOG_ERROR("user_ctrl set is ng");
