@@ -99,6 +99,12 @@
 
 //******************************** Macros ***********************************//
 //---------------------------------------------------------------------------//
+//******************************* variable **********************************//
+static double g_gyro_scale = 131.0;
+static double g_accel_scale = 16384.0;
+static uint8_t g_is_init_flag = MPUXXX_NOT_INIT;
+//******************************* variable **********************************//
+//---------------------------------------------------------------------------//
 //******************************* Functions *********************************//
 
 
@@ -124,22 +130,46 @@ static mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
  * @brief 设置陀螺仪满量程范围
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 陀螺仪满量程设置值
+ *          | data |   量程范围   | 灵敏度 |
+ *             0     正负250度/秒    131
+ *             1     正负500度/秒    65.5
+ *             2     正负1000度/秒   32.8
+ *             3     正负2000度/秒   14.4
  * @return 执行状态
  */
-static mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                     uint8_t data)
+static mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,
+                                                           uint8_t  fsr)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    uint8_t temp_fsr = fsr <<3;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_GYRO_CFG_REG,&temp_fsr,1);
+    if (ret!=MPUxxx_OK)
+    {
+        LOG_DEBUG("mpuxxx set gyro fsr is ng");
+        return ret;
+    }
+    switch (fsr)
+    {
+        case 0: g_gyro_scale = 131.0;break;
+        case 1: g_gyro_scale =  65.5;break;
+        case 2: g_gyro_scale =  32.8;break;
+        case 3: g_gyro_scale =  16.4;break;
+        default:g_gyro_scale = 131.0;
+    }
+    return ret;
 }
 
 /**
  * @brief 设置加速度计满量程范围
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 加速度计满量程设置值
+ *
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                       uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
 }
 
 /**
