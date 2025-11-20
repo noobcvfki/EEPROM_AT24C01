@@ -86,16 +86,16 @@
 #ifdef DEBUG
 #define LOG_DEBUG(x)  log_d(x)
 #define LOG_ERROR(x)  log_e(x)
-#define NULL_CHECK(x,tag) do{\
-    if(NULL == x){\
-        LOG_ERROR("discover null prt");\
-        goto tag;\
-    }}while (0)
 #else
-#define LOG_DEBUG(x)        (0)
-#define LOG_ERROR(x)        (0)
-#define NULL_CHECK(x,tag)   (0)
+#define LOG_DEBUG(x)        ((void)0)
+#define LOG_ERROR(x)        ((void)0)
 #endif//end of DEBUG
+
+#define NULL_CHECK(x,tag) do{\
+if(NULL == x){\
+LOG_ERROR("discover null prt");\
+goto tag;\
+}}while (0)
 
 //******************************** Macros ***********************************//
 //---------------------------------------------------------------------------//
@@ -253,16 +253,16 @@ static mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @brief 设置中断使能
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 中断使能设置值
- *|     |      陀螺仪       |      加速度计     |         |
- *|data |    中断名称     |延迟 (ms)|带宽 (Hz)|延迟 (ms)|陀螺仪输出率|
- *|BIT0	| 控制数据准备中断  | 0.98	  | 260	   | 0.98	 |  8 kHz  |
- *|BIT1	|     预留	     |  2.9	  | 184	   |  2.9	 |  1 kHz  |
- *|BIT2	|  	  预留        |  3.9	  | 92	   |  3.9	 |  1 kHz  |
- *|BIT3	| I2C主机相关中断	 |  4.9	  | 44	   |  4.9	 |  1 kHz  |
- *|BIT4	| FIFO 溢出中断	 |  6.1	  | 21	   |  6.1	 |  1 kHz  |
- *|BIT5	|   控制静态	     |  8.5	  | 10	   |  8.5	 |  1 kHz  |
- *|BIT6	| 检测运动中断      | 13.2	  | 5	   | 13.2	 |  1 kHz  |
- *|BIT7	| 自由落体中断	     | 0.17	  | 44	   | 0.98	 |  8 kHz  |
+ *|     |      陀螺仪
+ *|data |    中断名称
+ *|BIT0	| 控制数据准备中断
+ *|BIT1	|     预留
+ *|BIT2	|  	  预留
+ *|BIT3	| I2C主机相关中断
+ *|BIT4	| FIFO 溢出中断
+ *|BIT5	|   控制静态
+ *|BIT6	| 检测运动中断
+ *|BIT7	| 自由落体中断
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t *p_mpuxxx,
@@ -305,7 +305,7 @@ static mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t *p_mp
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                      uint8_t data)
+                                                            uint8_t data)
 {
 }
 
@@ -316,7 +316,7 @@ static mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                      uint8_t data)
+                                                            uint8_t data)
 {
 }
 
@@ -327,7 +327,7 @@ static mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                          uint8_t data)
+                                                                uint8_t data)
 {
 }
 
@@ -338,7 +338,7 @@ static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxx
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                          uint8_t data)
+                                                                uint8_t data)
 {
 }
 
@@ -349,7 +349,7 @@ static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxx
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                        uint8_t data)
+                                                              uint8_t data)
 {
 }
 
@@ -360,7 +360,7 @@ static mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                 mpuxxx_data_t *p_data)
+                                                        mpuxxx_data_t *p_data)
 {
 }
 
@@ -371,7 +371,7 @@ static mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                           mpuxxx_data_t *p_data)
+                                                  mpuxxx_data_t *p_data)
 {
 }
 
@@ -382,7 +382,7 @@ static mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                          mpuxxx_data_t *p_data)
+                                                 mpuxxx_data_t *p_data)
 {
 }
 
@@ -393,7 +393,7 @@ static mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                              mpuxxx_data_t *p_data)
+                                                     mpuxxx_data_t *p_data)
 {
 }
 
@@ -415,8 +415,9 @@ static mpuxxx_status_t mpu_driver_get_interrupt_status_reg(
  * @param[out] p_data FIFO数据输出指针
  * @return 执行状态
  */
-static mpuxxx_status_t mpu_driver_read_fifo_packet(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                            mpuxxx_data_t       *p_data)
+static mpuxxx_status_t mpu_driver_read_fifo_packet(
+                                               bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                     mpuxxx_data_t *p_data)
 {
 }
 
@@ -426,8 +427,9 @@ static mpuxxx_status_t mpu_driver_read_fifo_packet(bsp_mpuxxx_driver_t *p_mpuxxx
  * @param[out] p_data FIFO数据输出指针
  * @return 执行状态
  */
-static mpuxxx_status_t mpu_driver_read_fifo_isr_occur(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                               mpuxxx_data_t       *p_data)
+static mpuxxx_status_t mpu_driver_read_fifo_isr_occur(
+                                            bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                  mpuxxx_data_t *p_data)
 {
 }
 
@@ -492,7 +494,7 @@ mpuxxx_status_t bsp_mpuxxx_driver_inst(
     NULL_CHECK(semaphore_handle,                      mpu_driver_inst_null);
     NULL_CHECK(notify_handle,                         mpu_driver_inst_null);
 #endif //OS_SUPPORTING
-    //******************************* 检查IIC参数 *******************************//
+    //****************************** 检查IIC参数 *****************************//
     NULL_CHECK(p_iic_driver_interface->pf_iic_init,
                                                          mpu_driver_inst_null);
     NULL_CHECK(p_iic_driver_interface->pf_iic_deinit,
@@ -505,7 +507,7 @@ mpuxxx_status_t bsp_mpuxxx_driver_inst(
                                                          mpu_driver_inst_null);
     p_mpuxxx_driver->p_iic_driver_interface = p_iic_driver_interface;
 #ifdef OS_SUPPORTING
-    //**************************** 检查OS延时参数 *********************************//
+    //*************************** 检查OS延时参数 *******************************//
     NULL_CHECK(p_yield_interface->pf_rtos_yield,
                                               mpu_driver_inst_null);
     p_mpuxxx_driver->p_yield_interface = p_yield_interface;
@@ -542,27 +544,28 @@ mpuxxx_status_t bsp_mpuxxx_driver_inst(
     NULL_CHECK(p_timebase_interface->pf_get_tick_count_ms,
                                                          mpu_driver_inst_null);
     p_mpuxxx_driver->p_timebase_interface = p_timebase_interface;
-    p_mpuxxx_driver->pf_deinit = mpu_driver_deinit;
-    p_mpuxxx_driver->pf_sleep = mpu_driver_sleep;
-    p_mpuxxx_driver->pf_wakeup = mpu_driver_wakeup;
-    p_mpuxxx_driver->pf_set_gyro_fsr = mpu_driver_set_gyro_fsr;
-    p_mpuxxx_driver->pf_set_accel_fsr = mpu_driver_set_accel_fsr;
-    p_mpuxxx_driver->pf_set_lpf = mpu_driver_set_lpf;
-    p_mpuxxx_driver->pf_set_rate = mpu_driver_set_rate;
+    p_mpuxxx_driver->pf_deinit =                             mpu_driver_deinit;
+    p_mpuxxx_driver->pf_sleep =                               mpu_driver_sleep;
+    p_mpuxxx_driver->pf_wakeup =                             mpu_driver_wakeup;
+    p_mpuxxx_driver->pf_set_gyro_fsr =                 mpu_driver_set_gyro_fsr;
+    p_mpuxxx_driver->pf_set_accel_fsr =               mpu_driver_set_accel_fsr;
+    p_mpuxxx_driver->pf_set_lpf =                           mpu_driver_set_lpf;
+    p_mpuxxx_driver->pf_set_rate =                         mpu_driver_set_rate;
     p_mpuxxx_driver->pf_set_interrupt_enable = mpu_driver_set_interrupt_enable;
     p_mpuxxx_driver->pf_set_motion_threshold = mpu_driver_set_motion_threshold;
-    p_mpuxxx_driver->pf_set_INT_level = mpu_driver_set_INT_level;
-    p_mpuxxx_driver->pf_set_user_ctrl = mpu_driver_set_user_ctrl;
-    p_mpuxxx_driver->pf_set_pwr_mgmt1_reg = mpu_driver_set_pwr_mgmt1_reg;
-    p_mpuxxx_driver->pf_set_pwr_mgmt2_reg = mpu_driver_set_pwr_mgmt2_reg;
-    p_mpuxxx_driver->pf_set_fifo_en_reg = mpu_driver_set_fifo_en_reg;
-    p_mpuxxx_driver->pf_get_temperature = mpu_driver_get_temperature;
-    p_mpuxxx_driver->pf_get_accel = mpu_driver_get_accel;
-    p_mpuxxx_driver->pf_get_gyro = mpu_driver_get_gyro;
-    p_mpuxxx_driver->pf_get_all_data = mpu_driver_get_all_data;
-    p_mpuxxx_driver->pf_get_interrupt_status_reg = mpu_driver_get_interrupt_status_reg;
-    p_mpuxxx_driver->pf_read_fifo_packet = mpu_driver_read_fifo_packet;
-    p_mpuxxx_driver->pf_read_fifo_isr_occur = mpu_driver_read_fifo_isr_occur;
+    p_mpuxxx_driver->pf_set_INT_level =               mpu_driver_set_INT_level;
+    p_mpuxxx_driver->pf_set_user_ctrl =               mpu_driver_set_user_ctrl;
+    p_mpuxxx_driver->pf_set_pwr_mgmt1_reg =       mpu_driver_set_pwr_mgmt1_reg;
+    p_mpuxxx_driver->pf_set_pwr_mgmt2_reg =       mpu_driver_set_pwr_mgmt2_reg;
+    p_mpuxxx_driver->pf_set_fifo_en_reg =           mpu_driver_set_fifo_en_reg;
+    p_mpuxxx_driver->pf_get_temperature =           mpu_driver_get_temperature;
+    p_mpuxxx_driver->pf_get_accel =                       mpu_driver_get_accel;
+    p_mpuxxx_driver->pf_get_gyro =                         mpu_driver_get_gyro;
+    p_mpuxxx_driver->pf_get_all_data =                 mpu_driver_get_all_data;
+    p_mpuxxx_driver->pf_get_interrupt_status_reg =
+                                           mpu_driver_get_interrupt_status_reg;
+    p_mpuxxx_driver->pf_read_fifo_packet =         mpu_driver_read_fifo_packet;
+    p_mpuxxx_driver->pf_read_fifo_isr_occur =   mpu_driver_read_fifo_isr_occur;
 
     p_mpuxxx_driver->queue_handle = queue_handle;
     p_mpuxxx_driver->semaphore_binary_handle = semaphore_handle;
