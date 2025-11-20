@@ -307,6 +307,14 @@ static mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t *p_mp
 static mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                             uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_INTBP_CFG_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("INT_level set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
@@ -318,6 +326,14 @@ static mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
 static mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                             uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_USER_CTRL_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("user_ctrl set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
@@ -329,6 +345,14 @@ static mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
 static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                                 uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_PWR_MGMT1_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("pwr_mgmt1 set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
@@ -340,6 +364,14 @@ static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxx
 static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                                 uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_PWR_MGMT2_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("pwr_mgmt2 set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
@@ -350,7 +382,14 @@ static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxx
  */
 static mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                               uint8_t data)
-{
+{    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_FIFO_EN_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("fifo_en set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
@@ -362,6 +401,18 @@ static mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
 static mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                         mpuxxx_data_t *p_data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    uint8_t data[2] = {0};
+    int16_t temp = 0;
+    ret = MPUXXX_READ_REG(p_mpuxxx,MPU_TEMP_OUTH_REG, data,2);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("temperature set is ng");
+        return ret;
+    }
+    temp = (int16_t)(data[0]<<8 | data[1]);
+    p_data->temperature = (float)(temp / 340.0 + 36.53);
+    return ret;
 }
 
 /**
@@ -373,6 +424,22 @@ static mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
 static mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                   mpuxxx_data_t *p_data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    uint8_t data[6] = {0};
+    ret = MPUXXX_READ_REG(p_mpuxxx,MPU_MOTION_DET_REG, data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("get_accel set is ng");
+        return ret;
+    }
+    p_data->accel_x_raw = (int16_t)(data[0]<<8 | data[1]);
+    p_data->accel_y_raw = (int16_t)(data[2]<<8 | data[3]);
+    p_data->accel_z_raw = (int16_t)(data[4]<<8 | data[5]);
+
+    p_data->ax = (double)(p_data->accel_x_raw/g_accel_scale);
+    p_data->ay = (double)(p_data->accel_y_raw/g_accel_scale);
+    p_data->az = (double)(p_data->accel_z_raw/g_accel_scale);
+    return ret;
 }
 
 /**
@@ -384,6 +451,24 @@ static mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
 static mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                  mpuxxx_data_t *p_data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    uint8_t data[6] = {0};
+
+    ret = MPUXXX_READ_REG(p_mpuxxx, MPU_GYRO_XOUTH_REG, data, 6);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("get_gyro set is ng");
+        return ret;
+    }
+    p_data->gyro_x_raw = (int16_t)(data[0] << 8 | data[1]);
+    p_data->gyro_y_raw = (int16_t)(data[2] << 8 | data[3]);
+    p_data->gyro_z_raw = (int16_t)(data[4] << 8 | data[5]);
+
+    p_data->gx = (double)(p_data->gyro_x_raw / g_gyro_scale);
+    p_data->gy = (double)(p_data->gyro_y_raw / g_gyro_scale);
+    p_data->gz = (double)(p_data->gyro_z_raw / g_gyro_scale);
+
+    return ret;
 }
 
 /**
@@ -395,8 +480,37 @@ static mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t *p_mpuxxx,
 static mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                      mpuxxx_data_t *p_data)
 {
-}
+    mpuxxx_status_t ret = MPUxxx_OK;
+    uint8_t data[14] = {0};
+    int16_t temp = 0;
 
+    ret = MPUXXX_READ_REG(p_mpuxxx, MPU_ACCEL_XOUTH_REG, data, 14);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("all_data set is ng");
+        return ret;
+    }
+    p_data->accel_x_raw = (int16_t)(data[0] << 8 | data[1]);
+    p_data->accel_y_raw = (int16_t)(data[2] << 8 | data[3]);
+    p_data->accel_z_raw = (int16_t)(data[4] << 8 | data[5]);
+
+    p_data->ax = (double)(p_data->accel_x_raw / g_accel_scale);
+    p_data->ay = (double)(p_data->accel_y_raw / g_accel_scale);
+    p_data->az = (double)(p_data->accel_z_raw / g_accel_scale);
+
+    temp = (int16_t)(data[6] << 8 | data[7]);
+    p_data->temperature = (float)(temp / 340.0 + 36.53);
+
+    p_data->gyro_x_raw = (int16_t)(data[ 8] << 8 | data[9]);
+    p_data->gyro_y_raw = (int16_t)(data[10] << 8 | data[11]);
+    p_data->gyro_z_raw = (int16_t)(data[12] << 8 | data[13]);
+
+    p_data->gx = (double)(p_data->gyro_x_raw / g_gyro_scale);
+    p_data->gy = (double)(p_data->gyro_y_raw / g_gyro_scale);
+    p_data->gz = (double)(p_data->gyro_z_raw / g_gyro_scale);
+    return ret;
+}
+//TODO：FIFO相关配置
 /**
  * @brief 获取中断状态寄存器值
  * @param[in] p_mpuxxx MPU驱动结构体指针
@@ -407,6 +521,14 @@ static mpuxxx_status_t mpu_driver_get_interrupt_status_reg(
                                        bsp_mpuxxx_driver_t *p_mpuxxx,
                                        uint8_t             *p_data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_READ_REG(p_mpuxxx,MPU_INT_STA_REG, p_data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("get_interrupt set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
@@ -419,6 +541,14 @@ static mpuxxx_status_t mpu_driver_read_fifo_packet(
                                                bsp_mpuxxx_driver_t *p_mpuxxx,
                                                      mpuxxx_data_t *p_data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_MOTION_DET_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("read_fifo set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
@@ -431,6 +561,16 @@ static mpuxxx_status_t mpu_driver_read_fifo_isr_occur(
                                             bsp_mpuxxx_driver_t *p_mpuxxx,
                                                   mpuxxx_data_t *p_data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    //** can not be used, because the fifo data is not correct**//
+
+    // ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_MOTION_DET_REG, &data,1);
+    // if (MPUxxx_OK!= ret)
+    // {
+    //     LOG_ERROR("read_fifo_isr set is ng");
+    //     return ret;
+    // }
+    return ret;
 }
 
 /**
@@ -440,6 +580,8 @@ static mpuxxx_status_t mpu_driver_read_fifo_isr_occur(
  */
 static mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+
 }
 
 
@@ -450,6 +592,14 @@ static mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
  */
 static mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_MOTION_DET_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("user_ctrl set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 mpuxxx_status_t bsp_mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
