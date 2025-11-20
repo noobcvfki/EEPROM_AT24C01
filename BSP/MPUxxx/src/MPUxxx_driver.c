@@ -45,6 +45,14 @@
 //******************************** Defines **********************************//
 //---------------------------------------------------------------------------//
 //******************************** Macros ***********************************//
+
+//  HAL_StatusTypeDef HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c,
+//                                               uint16_t DevAddress,
+//                                               uint16_t MemAddress,
+//                                               uint16_t MemAddSize,
+//                                               uint8_t* pData,
+//                                               uint16_t Size,
+//                                               uint32_t Timeout)
 #define MPUXXX_WRITE_REG(p_mpu_driver,reg,p_data,len)\
    p_mpu_driver->p_iic_driver_interface->pf_iic_mem_write(\
    p_mpu_driver->p_iic_driver_interface->hi2c,\
@@ -55,6 +63,13 @@
    len,\
    TIME_OUT_MS\
 )
+//HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c,
+//                                            uint16_t DevAddress,
+//                                            uint16_t MemAddress,
+//                                            uint16_t MemAddSize,
+//                                            uint8_t  *pData,
+//                                            uint16_t Size,
+//                                            uint32_t Timeout)
 #define MPUXXX_READ_REG(p_mpu_driver,reg,p_data,len)\
     p_mpu_driver->p_iic_driver_interface->pf_iic_mem_read(\
     p_mpu_driver->p_iic_driver_interface->hi2c,\
@@ -77,37 +92,22 @@
         goto tag;\
     }}while (0)
 #else
-#define DEBUG_LOG(x)        (0)
+#define LOG_DEBUG(x)        (0)
+#define LOG_ERROR(x)        (0)
 #define NULL_CHECK(x,tag)   (0)
 #endif//end of DEBUG
 
 //******************************** Macros ***********************************//
 //---------------------------------------------------------------------------//
 //******************************* Functions *********************************//
-/**
- * @brief 初始化MPU驱动
- * @param[in,out] p_mpuxxx MPU驱动结构体指针
- * @return 执行状态
- */
-mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
-{
-}
 
-/**
- * @brief 反初始化MPU驱动
- * @param[in,out] p_mpuxxx MPU驱动结构体指针
- * @return 执行状态
- */
-mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t *p_mpuxxx)
-{
-}
 
 /**
  * @brief 使MPU进入睡眠模式
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t *p_mpuxxx)
+static mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
 }
 
@@ -116,7 +116,7 @@ mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t *p_mpuxxx)
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
+static mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
 }
 
@@ -126,7 +126,7 @@ mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
  * @param[in] data 陀螺仪满量程设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                      uint8_t data)
 {
 }
@@ -137,7 +137,7 @@ mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 加速度计满量程设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                       uint8_t data)
 {
 }
@@ -148,7 +148,7 @@ mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 低通滤波器设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                 uint8_t data)
 {
 }
@@ -159,7 +159,7 @@ mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 采样率设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                  uint8_t data)
 {
 }
@@ -170,7 +170,7 @@ mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 中断使能设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                              uint8_t data)
 {
 }
@@ -181,7 +181,7 @@ mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 运动检测阈值设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                              uint8_t data)
 {
 }
@@ -192,7 +192,7 @@ mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 中断电平设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                       uint8_t data)
 {
 }
@@ -203,7 +203,7 @@ mpuxxx_status_t mpu_driver_set_INT_level(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 用户控制设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                       uint8_t data)
 {
 }
@@ -214,7 +214,7 @@ mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 电源管理1设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                           uint8_t data)
 {
 }
@@ -225,7 +225,7 @@ mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data 电源管理2设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                           uint8_t data)
 {
 }
@@ -236,7 +236,7 @@ mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[in] data FIFO使能设置值
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                         uint8_t data)
 {
 }
@@ -247,7 +247,7 @@ mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[out] p_data 温度数据输出指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                  mpuxxx_data_t *p_data)
 {
 }
@@ -258,7 +258,7 @@ mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[out] p_data 加速度计数据输出指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
                                            mpuxxx_data_t *p_data)
 {
 }
@@ -269,7 +269,7 @@ mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[out] p_data 陀螺仪数据输出指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t *p_mpuxxx,
                                           mpuxxx_data_t *p_data)
 {
 }
@@ -280,7 +280,7 @@ mpuxxx_status_t mpu_driver_get_gyro(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[out] p_data 所有传感器数据输出指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t *p_mpuxxx,
                                               mpuxxx_data_t *p_data)
 {
 }
@@ -291,7 +291,7 @@ mpuxxx_status_t mpu_driver_get_all_data(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[out] p_data 中断状态寄存器值输出指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_get_interrupt_status_reg(
+static mpuxxx_status_t mpu_driver_get_interrupt_status_reg(
                                        bsp_mpuxxx_driver_t *p_mpuxxx,
                                        uint8_t             *p_data)
 {
@@ -303,7 +303,7 @@ mpuxxx_status_t mpu_driver_get_interrupt_status_reg(
  * @param[out] p_data FIFO数据输出指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_read_fifo_packet(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_read_fifo_packet(bsp_mpuxxx_driver_t *p_mpuxxx,
                                             mpuxxx_data_t       *p_data)
 {
 }
@@ -314,11 +314,29 @@ mpuxxx_status_t mpu_driver_read_fifo_packet(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[out] p_data FIFO数据输出指针
  * @return 执行状态
  */
-mpuxxx_status_t mpu_driver_read_fifo_isr_occur(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_read_fifo_isr_occur(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                mpuxxx_data_t       *p_data)
 {
 }
 
+/**
+ * @brief 初始化MPU驱动
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @return 执行状态
+ */
+static mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
+{
+}
+
+
+/**
+ * @brief 反初始化MPU驱动
+ * @param[in,out] p_mpuxxx MPU驱动结构体指针
+ * @return 执行状态
+ */
+static mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t *p_mpuxxx)
+{
+}
 
 
 mpuxxx_status_t bsp_mpuxxx_driver_inst(
