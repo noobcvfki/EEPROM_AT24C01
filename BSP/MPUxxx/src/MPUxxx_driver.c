@@ -129,8 +129,8 @@ static mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
 /**
  * @brief 设置陀螺仪满量程范围
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
- * @param[in] data 陀螺仪满量程设置值
- *          | data |   量程范围   | 灵敏度 |
+ * @param[in] fsr 陀螺仪满量程设置值
+ *          | fsr |   量程范围   | 灵敏度 |
  *             0     正负250度/秒    131
  *             1     正负500度/秒    65.5
  *             2     正负1000度/秒   32.8
@@ -140,12 +140,13 @@ static mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
 static mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,
                                                            uint8_t  fsr)
 {
+    LOG_DEBUG("=======set gyro fsr=======");
     mpuxxx_status_t ret = MPUxxx_OK;
     uint8_t temp_fsr = fsr <<3;
     ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_GYRO_CFG_REG,&temp_fsr,1);
     if (ret!=MPUxxx_OK)
     {
-        LOG_DEBUG("mpuxxx set gyro fsr is ng");
+        LOG_ERROR("mpuxxx set gyro fsr is ng");
         return ret;
     }
     switch (fsr)
@@ -162,8 +163,8 @@ static mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,
 /**
  * @brief 设置加速度计满量程范围
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
- * @param[in] data 加速度计满量程设置值
- *                  |data|  量程  | 灵敏度 |
+ * @param[in] fsr 加速度计满量程设置值
+ *                  | fsr|  量程  | 灵敏度 |
  *                  |  0 |正负 2g | 16384 |
  *                  |  1 |正负 4g |  8192 |
  *                  |  2 |正负 8g |  4096 |
@@ -171,18 +172,18 @@ static mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                      uint8_t data)
+                                                      uint8_t fsr)
 {
     LOG_DEBUG("=======set accel fsr=======");
     mpuxxx_status_t ret = MPUxxx_OK;
-    uint8_t fsr = data <<3;
-    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_ACCEL_CFG_REG,&fsr,1);
+    uint8_t fsr_temp = fsr <<3;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_ACCEL_CFG_REG,&fsr_temp,1);
     if (MPUxxx_OK!= ret)
     {
         LOG_ERROR("accel fsr is ng");
         return ret;
     }
-    switch (data)
+    switch (fsr)
     {
         case 0: g_accel_scale = 16384;break;
         case 1: g_accel_scale =  8192;break;
@@ -197,6 +198,16 @@ static mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @brief 设置低通滤波器
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 低通滤波器设置值
+ *|     |      陀螺仪       |      加速度计     |         |
+ *|data |带宽 (Hz)|延迟 (ms)|带宽 (Hz)|延迟 (ms)|陀螺仪输出率|
+ *|  0	|  256	 | 0.98	  | 260	   | 0.98	 |  8 kHz  |
+ *|  1	|  184	 |  2.9	  | 184	   |  2.9	 |  1 kHz  |
+ *|  2	|   92	 |  3.9	  | 92	   |  3.9	 |  1 kHz  |
+ *|  3	|   44	 |  4.9	  | 44	   |  4.9	 |  1 kHz  |
+ *|  4	|   21	 |  6.1	  | 21	   |  6.1	 |  1 kHz  |
+ *|  5	|   10	 |  8.5	  | 10	   |  8.5	 |  1 kHz  |
+ *|  6	|    5	 | 13.2	  | 5	   | 13.2	 |  1 kHz  |
+ *|  7	| 3600	 | 0.17	  | 44	   | 0.98	 |  8 kHz  |
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t *p_mpuxxx,
@@ -389,6 +400,10 @@ static mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
 }
 
+mpuxxx_status_t bsp_mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
+{
+    mpuxxx_driver_init(p_mpuxxx);
+}
 
 mpuxxx_status_t bsp_mpuxxx_driver_inst(
     bsp_mpuxxx_driver_t    *p_mpuxxx_driver,
@@ -503,7 +518,7 @@ mpuxxx_status_t bsp_mpuxxx_driver_inst(
     p_mpuxxx_driver->semaphore_binary_handle = semaphore_handle;
     p_mpuxxx_driver->notify_handle = notify_handle;
 
-    ret = mpuxxx_driver_init(p_mpuxxx_driver);
+    ret = bsp_mpuxxx_driver_init(p_mpuxxx_driver);
     if (MPUxxx_OK != ret){LOG_ERROR("mpu init is ng");return MPUxxx_ERROR;}
 mpu_driver_inst_null:
     {
