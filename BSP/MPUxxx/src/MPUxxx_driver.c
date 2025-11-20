@@ -38,7 +38,7 @@
 #define MPUXXX_INIT       1
 #ifdef LOG_TAG
 #undef LOG_TAG
-#define LOG_TAG "MPUXXX_driver"
+#define LOG_TAG "driver"
 #else
 #define LOG_TAG "MPUXXX_driver"
 #endif
@@ -163,13 +163,34 @@ static mpuxxx_status_t mpu_driver_set_gyro_fsr(bsp_mpuxxx_driver_t* p_mpuxxx,
  * @brief 设置加速度计满量程范围
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 加速度计满量程设置值
- *
+ *                  |data|  量程  | 灵敏度 |
+ *                  |  0 |正负 2g | 16384 |
+ *                  |  1 |正负 4g |  8192 |
+ *                  |  2 |正负 8g |  4096 |
+ *                  |  3 |正负16g |  2048 |
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                       uint8_t data)
 {
+    LOG_DEBUG("=======set accel fsr=======");
     mpuxxx_status_t ret = MPUxxx_OK;
+    uint8_t fsr = data <<3;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_ACCEL_CFG_REG,&fsr,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("accel fsr is ng");
+        return ret;
+    }
+    switch (data)
+    {
+        case 0: g_accel_scale = 16384;break;
+        case 1: g_accel_scale =  8192;break;
+        case 2: g_accel_scale =  4096;break;
+        case 3: g_accel_scale =  2048;break;
+        default:g_accel_scale = 16384;break;
+    }
+    return ret;
 }
 
 /**
