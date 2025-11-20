@@ -253,11 +253,30 @@ static mpuxxx_status_t mpu_driver_set_rate(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @brief 设置中断使能
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 中断使能设置值
+ *|     |      陀螺仪       |      加速度计     |         |
+ *|data |    中断名称     |延迟 (ms)|带宽 (Hz)|延迟 (ms)|陀螺仪输出率|
+ *|BIT0	| 控制数据准备中断  | 0.98	  | 260	   | 0.98	 |  8 kHz  |
+ *|BIT1	|     预留	     |  2.9	  | 184	   |  2.9	 |  1 kHz  |
+ *|BIT2	|  	  预留        |  3.9	  | 92	   |  3.9	 |  1 kHz  |
+ *|BIT3	| I2C主机相关中断	 |  4.9	  | 44	   |  4.9	 |  1 kHz  |
+ *|BIT4	| FIFO 溢出中断	 |  6.1	  | 21	   |  6.1	 |  1 kHz  |
+ *|BIT5	|   控制静态	     |  8.5	  | 10	   |  8.5	 |  1 kHz  |
+ *|BIT6	| 检测运动中断      | 13.2	  | 5	   | 13.2	 |  1 kHz  |
+ *|BIT7	| 自由落体中断	     | 0.17	  | 44	   | 0.98	 |  8 kHz  |
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                             uint8_t data)
+                                                                   uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+
+    ret = MPUXXX_WRITE_REG(p_mpuxxx, MPU_INT_EN_REG , &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("interrupt set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
@@ -269,6 +288,14 @@ static mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t *p_mp
 static mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                              uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_MOTION_DET_REG, &data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("threshold set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
