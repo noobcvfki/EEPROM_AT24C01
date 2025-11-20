@@ -213,6 +213,14 @@ static mpuxxx_status_t mpu_driver_set_accel_fsr(bsp_mpuxxx_driver_t *p_mpuxxx,
 static mpuxxx_status_t mpu_driver_set_lpf(bsp_mpuxxx_driver_t *p_mpuxxx,
                                                 uint8_t data)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_CFG_REG,&data,1);
+    if (MPUxxx_OK!= ret)
+    {
+        LOG_ERROR("DLPF set is ng");
+        return ret;
+    }
+    return ret;
 }
 
 /**
