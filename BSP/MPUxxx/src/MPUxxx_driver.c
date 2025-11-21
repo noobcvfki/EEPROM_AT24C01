@@ -91,11 +91,12 @@
 #define LOG_ERROR(x)        ((void)0)
 #endif//end of DEBUG
 
-#define NULL_CHECK(x,tag) do{\
-if(NULL == x){\
-LOG_ERROR("discover null prt");\
-goto tag;\
-}}while (0)
+#define NULL_CHECK(x,tag) do{                                  \
+                              if(NULL == x){                   \
+                                LOG_ERROR("discover null prt");\
+                                goto tag;}                     \
+                              }while (0)
+
 
 //******************************** Macros ***********************************//
 //---------------------------------------------------------------------------//
@@ -126,6 +127,14 @@ static mpuxxx_status_t mpu_driver_sleep(bsp_mpuxxx_driver_t *p_mpuxxx)
  */
 static mpuxxx_status_t mpu_driver_wakeup(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
+    mpuxxx_status_t ret = MPUxxx_OK;
+    uint8_t data = 0x40;//0b0100 0000
+    ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_PWR_MGMT1_REG,&data,1);
+    if (ret!=MPUxxx_OK)
+    {
+        LOG_ERROR("mpuxxx wakeup is ng");
+        return ret;
+    }
     g_is_init_flag = MPUXXX_INIT;
     return MPUxxx_OK;
 }
@@ -349,6 +358,25 @@ static mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @brief 设置电源管理1寄存器
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 电源管理1设置值
+ *|------------------------------------ |
+ *|BIT7：置位后所有传感器恢复默认值           |
+ *|BIT6：置位后进入睡眠模式                 |
+ *|BIT5：置位切没有进入睡眠模式则MPU进行循环模式|
+ *|BIT4：保留                            |
+ *|BIT3：置位禁止温度传感器                 |
+ *|BIT[0~2]：配置时钟                     |
+ *|-------------------------------------|
+ *|BIT[0~2]的值      时钟        |
+ *|----------------------------|
+ *|    0          内部时钟       |
+ *|    1        x轴陀螺仪锁相环   |
+ *|    2        Y轴陀螺仪锁相环   |
+ *|    3        z轴陀螺仪锁相环   |
+ *|    4        外部32.768kHz   |
+ *|    5        外部19.2MHz     |
+ *|    6            保留        |
+ *|    7        关闭所有时钟      |
+ *|----------------------------|
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
@@ -368,6 +396,16 @@ static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxx
  * @brief 设置电源管理2寄存器
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @param[in] data 电源管理2设置值
+ *          置位为休眠，清零为正常工作，
+ * BIT7：x轴陀螺仪休眠   BIT4：x轴加速度计休眠
+ * BIT6：y轴陀螺仪休眠   BIT3：y轴加速度计休眠
+ * BIT5：z轴陀螺仪休眠   BIT2：z轴加速度计休眠
+ *仅当传感器处于 “循环睡眠 - 唤醒 ” 模式有效
+ * BIT[0,1]     唤醒周期
+ *    0         1.25ms
+ *    1          2.5ms
+ *    2            5ms
+ *    3           10ms
  * @return 执行状态
  */
 static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
@@ -632,19 +670,21 @@ static mpuxxx_status_t mpu_driver_read_fifo_isr_occur(
 static mpuxxx_status_t mpu_motion_init(bsp_mpuxxx_driver_t* p_mpuxxx)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
-
+    //启动运动检测
     ret = mpu_driver_set_motion_threshold(p_mpuxxx,0x10);
     if (MPUxxx_OK!= ret)
     {
         LOG_ERROR("motion threshold set is ng");
         return ret;
     }
+    //设置中断电平
     ret = mpu_driver_set_INT_level(p_mpuxxx,0x90);
     if (MPUxxx_OK!= ret)
     {
         LOG_ERROR("INT level set is ng");
         return ret;
     }
+    //启动中断
     ret = mpu_driver_set_interrupt_enable(p_mpuxxx,0x40);
     if (MPUxxx_OK!= ret)
     {
@@ -703,10 +743,83 @@ static mpuxxx_status_t mpuxxx_fifo_init(bsp_mpuxxx_driver_t* p_mpuxxx)
  * @param[in,out] p_mpuxxx MPU驱动结构体指针
  * @return 执行状态
  */
-static mpuxxx_status_t mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
+static mpuxxx_status_t mpuxxx_init(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
-
+    uint8_t id = 0;
+    //延时初始化
+#ifndef OS_SUPPORTING
+    p_mpuxxx->p_delay_interface->pf_delay_init();
+#endif
+    //iic初始化
+    p_mpuxxx->p_iic_driver_interface->pf_iic_init(NULL);
+    //复位
+    ret = mpu_driver_set_pwr_mgmt1_reg(p_mpuxxx,1<<7);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set power reset is ng");
+        return ret;
+    }
+#ifdef OS_SUPPORTING
+    p_mpuxxx->p_yield_interface->pf_rtos_yield(100);
+#else
+    p_mpuxxx->p_delay_interface->pf_delay_ms(100);
+#endif
+    ret = mpu_driver_wakeup(p_mpuxxx);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set power reset is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_gyro_fsr(p_mpuxxx,3);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set gyro fsr is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_accel_fsr(p_mpuxxx,0);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set accel fsr is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_rate(p_mpuxxx,0x19);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set rate is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_lpf(p_mpuxxx,0x04);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set lpf is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_interrupt_enable(p_mpuxxx,1);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set interrupt is ng");
+        return ret;
+    }
+    ret = MPUXXX_READ_REG(p_mpuxxx,MPU_DEVICE_ID_REG,&id,1);
+    if (ret!=MPUxxx_OK|| id !=MPU_ID)
+    {
+        LOG_ERROR("mpuxxx device ID is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_pwr_mgmt1_reg(p_mpuxxx,0x01);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set pwr1 is ng");
+        return ret;
+    }
+    ret = mpu_driver_set_pwr_mgmt2_reg(p_mpuxxx,0x00);
+    if (MPUxxx_OK != ret)
+    {
+        LOG_ERROR("set pwr2 is ng");
+        return ret;
+    }
+    return ret;
 }
 
 
@@ -728,7 +841,26 @@ static mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t *p_mpuxxx)
 
 mpuxxx_status_t bsp_mpuxxx_driver_init(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
-    mpuxxx_driver_init(p_mpuxxx);
+    mpuxxx_status_t ret = MPUxxx_OK;
+    if (MPUXXX_INIT == g_is_init_flag)
+    {
+        LOG_ERROR("mpuxxx is inited,not need init");
+        return MPUxxx_ERRORPARAMETER;
+    }
+    LOG_DEBUG("mpuxxx driver init is start");
+    ret = mpuxxx_init(p_mpuxxx);
+    if (MPUXXX_INIT == g_is_init_flag)
+    {
+        LOG_ERROR("mpuxxx init is ng");
+        return ret;
+    }
+    ret = mpuxxx_fifo_init(p_mpuxxx);
+    if (MPUXXX_INIT == g_is_init_flag)
+    {
+        LOG_ERROR("mpuxxx fifo init is ng");
+        return ret;
+    }
+    return ret;
 }
 
 mpuxxx_status_t bsp_mpuxxx_driver_inst(
