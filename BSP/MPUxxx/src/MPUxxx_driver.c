@@ -379,8 +379,9 @@ static mpuxxx_status_t mpu_driver_set_user_ctrl(bsp_mpuxxx_driver_t *p_mpuxxx,
  *|----------------------------|
  * @return 执行状态
  */
-static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                                uint8_t data)
+static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(
+                                                 bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                             uint8_t data)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
     ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_PWR_MGMT1_REG, &data,1);
@@ -408,8 +409,9 @@ static mpuxxx_status_t mpu_driver_set_pwr_mgmt1_reg(bsp_mpuxxx_driver_t *p_mpuxx
  *    3           10ms
  * @return 执行状态
  */
-static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                                uint8_t data)
+static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(
+                                              bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                          uint8_t data)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
     ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_PWR_MGMT2_REG, &data,1);
@@ -429,7 +431,8 @@ static mpuxxx_status_t mpu_driver_set_pwr_mgmt2_reg(bsp_mpuxxx_driver_t *p_mpuxx
  * 温度	陀螺仪X 陀螺仪Y  陀螺仪Z  加速度计  从设备 2  从设备1 从设备 0
  * @return 执行状态
  */
-static mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_fifo_en_reg(
+                                             bsp_mpuxxx_driver_t *p_mpuxxx,
                                                               uint8_t data)
 {    mpuxxx_status_t ret = MPUxxx_OK;
     ret = MPUXXX_WRITE_REG(p_mpuxxx,MPU_FIFO_EN_REG, &data,1);
@@ -447,8 +450,9 @@ static mpuxxx_status_t mpu_driver_set_fifo_en_reg(bsp_mpuxxx_driver_t *p_mpuxxx,
  * @param[out] p_data 温度数据输出指针
  * @return 执行状态
  */
-static mpuxxx_status_t mpu_driver_get_temperature(bsp_mpuxxx_driver_t *p_mpuxxx,
-                                                        mpuxxx_data_t *p_data)
+static mpuxxx_status_t mpu_driver_get_temperature(
+                                               bsp_mpuxxx_driver_t *p_mpuxxx,
+                                                     mpuxxx_data_t *p_data)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
     uint8_t data[2] = {0};
@@ -831,6 +835,7 @@ static mpuxxx_status_t mpuxxx_init(bsp_mpuxxx_driver_t *p_mpuxxx)
 static mpuxxx_status_t mpu_driver_deinit(bsp_mpuxxx_driver_t *p_mpuxxx)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
+    ret = mpu_driver_sleep(p_mpuxxx);
     if (MPUxxx_OK!= ret)
     {
         LOG_ERROR("user_ctrl set is ng");
