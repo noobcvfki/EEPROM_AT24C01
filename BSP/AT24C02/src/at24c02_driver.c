@@ -30,16 +30,151 @@
                                 goto NULL_ERROR;              \
                             }                                 \
                       }while (0)
+
+#define RETURN_CHECK(x) do{                                   \
+                            if(EEPROM_OK != x){               \
+                                ERROR_LOG("function is ng");  \
+                                goto RETURN_ERROR;            \
+                            }                                 \
+                         }while (0)
+
+#define IIC_HANDLE p_eeprom->p_eeprom_software_iic_driver->iic_handle
+#define IIC_INSTANCE p_eeprom->p_eeprom_software_iic_driver
 //********************************* define **********************************//
 //---------------------------------------------------------------------------//
 //******************************** Function *********************************//
+static eeprom_status_t eeprom_readid(bsp_eeprom_driver_t* p_eeprom)
+{
+    eeprom_status_t ret = EEPROM_OK;
+    IIC_INSTANCE->critical_enable();
+//******************************** critical *********************************//
+    IIC_INSTANCE->pf_iic_start(IIC_HANDLE);
+    IIC_INSTANCE->pf_iic_send_byte(IIC_HANDLE,p_eeprom->iic_write_addr);
+    ret=
+    IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+    IIC_INSTANCE->pf_iic_stop(IIC_HANDLE);
+//******************************** critical *********************************//
+    IIC_INSTANCE->critical_disable();
+    if (ret != 0)
+    {
+        ERROR_LOG("eeprom not ack");
+        return EEPROM_ERROR;
+    }
+    return ret;
 
-static eeprom_status_t eeprom_init(bsp_eeprom_driver_t* p_eeprom);
-static eeprom_status_t eeprom_readid(bsp_eeprom_driver_t* p_eeprom);
+}
+
+static eeprom_status_t eeprom_init(bsp_eeprom_driver_t* p_eeprom)
+{
+    eeprom_status_t ret = EEPROM_OK;
+    ret = IIC_INSTANCE->pf_iic_init(IIC_HANDLE);
+    RETURN_CHECK(ret);
+    ret = eeprom_readid(IIC_HANDLE);
+    RETURN_CHECK(ret);
+    return ret;
+RETURN_ERROR:
+    {
+        ERROR_LOG("eeprom_init is ng");
+        return ret;
+    }
+}
+
 static eeprom_status_t eeprom_write(bsp_eeprom_driver_t* p_eeprom,
-                             uint8_t* p_data,uint8_t len);
+                                                uint8_t write_data_addr,
+                                                uint8_t* p_data,
+                                                uint8_t  len)
+{
+    eeprom_status_t ret = EEPROM_OK;
+    NULL_CHECK(p_data);
+    NULL_CHECK(p_eeprom);
+    if (0 == len)
+    {
+        ERROR_LOG("input len is 0");
+        return EEPROM_ERRORPARAMETER;
+    }
+    IIC_INSTANCE->critical_enable();
+//---------------------critical----------------------------//
+    IIC_INSTANCE->pf_iic_start(IIC_HANDLE);
+    IIC_INSTANCE->pf_iic_send_byte(IIC_HANDLE,p_eeprom->iic_write_addr);
+    ret = IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+    RETURN_CHECK(ret);
+    IIC_INSTANCE->pf_iic_send_byte(IIC_HANDLE,write_data_addr);
+    ret = IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+    RETURN_CHECK(ret);
+    for (uint8_t i = 0; i<len;i++)
+    {
+        IIC_INSTANCE->pf_iic_send_byte(IIC_HANDLE,*(p_data + i));
+        ret = IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+        RETURN_CHECK(ret);
+    }
+    IIC_INSTANCE->pf_iic_stop(IIC_HANDLE);
+//---------------------critical----------------------------//
+    IIC_INSTANCE->critical_disable();
+
+    return ret;
+    RETURN_ERROR:
+    {
+        ERROR_LOG("eeprom not ack");
+        return ret;
+    }
+NULL_ERROR:
+    {
+        ERROR_LOG("input p_data is null");
+        return EEPROM_ERRORPARAMETER;
+    }
+}
 static eeprom_status_t eeprom_read(bsp_eeprom_driver_t* p_eeprom,
-                                  uint8_t* p_data,uint8_t len);
+                                               uint8_t  read_data_addr,
+                                               uint8_t* p_data,
+                                               uint8_t  len)
+{
+    eeprom_status_t ret = EEPROM_OK;
+    NULL_CHECK(p_data);
+    NULL_CHECK(p_eeprom);
+    if (0 == len)
+    {
+        ERROR_LOG("input len is 0");
+        return EEPROM_ERRORPARAMETER;
+    }
+    IIC_INSTANCE->critical_enable();
+    //---------------------critical----------------------------//
+    IIC_INSTANCE->pf_iic_start(IIC_HANDLE);
+    IIC_INSTANCE->pf_iic_send_byte(IIC_HANDLE,p_eeprom->iic_write_addr);
+    ret = IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+    RETURN_CHECK(ret);
+    IIC_INSTANCE->pf_iic_send_byte(IIC_HANDLE,read_data_addr);
+    ret = IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+    RETURN_CHECK(ret);
+
+    IIC_INSTANCE->pf_iic_start(IIC_HANDLE);
+    IIC_INSTANCE->pf_iic_send_byte(IIC_HANDLE,p_eeprom->iic_read_addr);
+    ret = IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+    RETURN_CHECK(ret);
+    for (uint8_t i = 0; i<len;i++)
+    {
+        IIC_INSTANCE->pf_iic_read_byte(IIC_HANDLE,p_data+i);
+        if (len-1 == i) break;
+        ret = IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+        RETURN_CHECK(ret);
+    }
+    IIC_INSTANCE->pf_iic_no_ack(IIC_HANDLE);
+    IIC_INSTANCE->pf_iic_stop(IIC_HANDLE);
+    //---------------------critical----------------------------//
+    IIC_INSTANCE->critical_disable();
+
+    return ret;
+
+    RETURN_ERROR:
+    {
+        ERROR_LOG("eeprom not ack");
+        return ret;
+    }
+    NULL_ERROR:
+        {
+            ERROR_LOG("input p_data is null");
+            return EEPROM_ERRORPARAMETER;
+        }
+}
 
 
 
@@ -52,23 +187,30 @@ eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
 {
     DEBUG_LOG("=============eeprom inst start==========");
     eeprom_status_t ret = EEPROM_OK;
-    NULL_CHECK(p_eeprom);
-    NULL_CHECK(p_iic);
-    NULL_CHECK(p_iic->iic_handle);
-    NULL_CHECK(p_iic->pf_iic_init);
-    NULL_CHECK(p_iic->pf_iic_deinit);
-    NULL_CHECK(p_iic->pf_iic_mem_read);
-    NULL_CHECK(p_iic->pf_iic_mem_write);
-    NULL_CHECK(p_iic->critical_enable);
-    NULL_CHECK(p_iic->critical_disable);
+    NULL_CHECK(p_eeprom                                 );
+    NULL_CHECK(p_iic                                    );
+    NULL_CHECK(p_iic->iic_handle                        );
+    NULL_CHECK(p_iic->pf_iic_init                       );
+    NULL_CHECK(p_iic->pf_iic_deinit                     );
+    NULL_CHECK(p_iic->pf_iic_start                      );
+    NULL_CHECK(p_iic->pf_iic_send_byte                  );
+    NULL_CHECK(p_iic->pf_iic_wait_ack                   );
+    NULL_CHECK(p_iic->pf_iic_read_byte                  );
+    NULL_CHECK(p_iic->pf_iic_send_ack                   );
+    NULL_CHECK(p_iic->pf_iic_no_ack                     );
+    NULL_CHECK(p_iic->pf_iic_stop                       );
+    NULL_CHECK(p_iic->critical_enable                   );
+    NULL_CHECK(p_iic->critical_disable                  );
 
-    p_eeprom->iic_read_addr = (eeprom_7bit_addr<<1)|1;
-    p_eeprom->iic_write_addr = (eeprom_7bit_addr<<1)|0;
-    p_eeprom->iic_handle = p_iic->iic_handle;
-    p_eeprom->pf_eeprom_init    =eeprom_init;
-    p_eeprom->pf_eeprom_readid =eeprom_readid;
-    p_eeprom->pf_eeprom_write = eeprom_write;
-    p_eeprom->pf_eeprom_read = eeprom_read;
+    p_eeprom->p_eeprom_software_iic_driver = p_iic;
+    p_eeprom->iic_handle       = p_iic->iic_handle;
+    p_eeprom->iic_read_addr    = (eeprom_7bit_addr<<1)|1;
+    p_eeprom->iic_write_addr   = (eeprom_7bit_addr<<1)|0;
+
+    p_eeprom->pf_eeprom_init   = eeprom_init;
+    p_eeprom->pf_eeprom_readid = eeprom_readid;
+    p_eeprom->pf_eeprom_write  = eeprom_write;
+    p_eeprom->pf_eeprom_read   = eeprom_read;
 
     ret = eeprom_init(p_eeprom);
     if (EEPROM_OK!=ret)

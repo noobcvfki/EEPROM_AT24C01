@@ -36,12 +36,17 @@ typedef enum
 typedef struct
 {
     void* iic_handle;
-    eeprom_status_t (*pf_iic_init)(void* p_iic_handle);
-    eeprom_status_t (*pf_iic_deinit)(void* p_iic_handle);
-    eeprom_status_t (*pf_iic_mem_read)(void* p_iic_handle,uint8_t* data);
-    eeprom_status_t (*pf_iic_mem_write)(void* p_iic_handle,uint8_t);
-    void (*critical_enable)(void);
-    void (*critical_disable)(void);
+    eeprom_status_t (*pf_iic_init     )(void* p_iic_handle);
+    eeprom_status_t (*pf_iic_deinit   )(void* p_iic_handle);
+    eeprom_status_t (*pf_iic_start    )(void* p_iic_handle);
+    eeprom_status_t (*pf_iic_send_byte)(void* p_iic_handle,uint8_t data);
+    eeprom_status_t (*pf_iic_wait_ack )(void* p_iic_handle);
+    eeprom_status_t (*pf_iic_read_byte)(void* p_iic_handle,uint8_t* p_data);
+    eeprom_status_t (*pf_iic_send_ack )(void* p_iic_handle);
+    eeprom_status_t (*pf_iic_no_ack   )(void* p_iic_handle);
+    eeprom_status_t (*pf_iic_stop     )(void* p_iic_handle);
+    void            (*critical_enable )(void);
+    void            (*critical_disable)(void);
 }eeprom_software_iic_driver_t;
 #else
 //硬件IIC
@@ -94,8 +99,10 @@ typedef struct bsp_eeprom_driver
     eeprom_status_t (*pf_eeprom_init)(bsp_eeprom_driver_t* p_eeprom);
     eeprom_status_t (*pf_eeprom_readid)(bsp_eeprom_driver_t* p_eeprom);
     eeprom_status_t (*pf_eeprom_write)(bsp_eeprom_driver_t* p_eeprom,
+                                      uint8_t write_addr,
                                       uint8_t* p_data,uint8_t len);
     eeprom_status_t (*pf_eeprom_read)(bsp_eeprom_driver_t* p_eeprom,
+                                      uint8_t read_addr,
                                       uint8_t* p_data,uint8_t len);
 
 }bsp_eeprom_driver_t;
