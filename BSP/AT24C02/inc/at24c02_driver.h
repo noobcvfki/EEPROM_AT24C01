@@ -100,11 +100,13 @@ typedef struct bsp_eeprom_driver
 
 }bsp_eeprom_driver_t;
 
-eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
 #ifdef SOFTWARE_IIC
-    eeprom_software_iic_driver_t* p_iic,
+eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
+                                 uint8_t eeprom_7bit_addr,
+                      eeprom_software_iic_driver_t* p_iic);
 #else
-    eeprom_hardware_iic_driver_t* p_iic,
+eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
+                                 uint8_t eeprom_7bit_addr,
+                      eeprom_hardware_iic_driver_t* p_iic);
 #endif
-    uint8_t iic_7bit_addr);
 #endif //USER_MPUXXX_AT24C02_DRIVER_H
