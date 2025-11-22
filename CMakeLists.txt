@@ -41,6 +41,8 @@ add_subdirectory(cmake/stm32cubemx)
 add_subdirectory(Debug)
 #添加BSP库
 add_subdirectory(BSP/MPUxxx)
+#添加用户软件库
+add_subdirectory(user_softlib)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -74,4 +76,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     # Add user defined libraries
         user_debug
         BSP_MPUxxx
+        softlib
 )
