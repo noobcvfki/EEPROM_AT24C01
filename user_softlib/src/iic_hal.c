@@ -1,5 +1,10 @@
 #include "iic_hal.h"
-#include "delay.h"
+#include "DWT_delay.h"
+
+static void delay_us(uint32_t us)
+{
+	DWT_Delay_us(us);
+}
 
 /**
   * @brief SDA线输入模式配置
@@ -286,7 +291,6 @@ unsigned char IIC_Read_One_Byte(iic_bus_t *bus, uint8_t daddr,uint8_t reg)
 
 uint8_t IIC_Read_Multi_Byte(iic_bus_t *bus, uint8_t daddr, uint8_t reg, uint8_t length, uint8_t buff[])
 {
-	unsigned char i;
 	IICStart(bus);
 	IICSendByte(bus,daddr<<1);
 	if(IICWaitAck(bus))
@@ -300,7 +304,7 @@ uint8_t IIC_Read_Multi_Byte(iic_bus_t *bus, uint8_t daddr, uint8_t reg, uint8_t 
 	IICStart(bus);
 	IICSendByte(bus,(daddr<<1)+1);
 	IICWaitAck(bus);
-	for(i=0;i<length;i++)
+	for(unsigned char i = 0;i<length;i++)
 	{
 		buff[i] = IICReceiveByte(bus);
 		if(i<length-1)
@@ -313,7 +317,7 @@ uint8_t IIC_Read_Multi_Byte(iic_bus_t *bus, uint8_t daddr, uint8_t reg, uint8_t 
 
 
 //
-void IICInit(iic_bus_t *bus)
+void IICInit(const iic_bus_t *bus)
 {
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 

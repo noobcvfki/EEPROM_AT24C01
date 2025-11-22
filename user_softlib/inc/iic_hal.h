@@ -1,5 +1,5 @@
-#ifndef __IIC_HAL_H
-#define __IIC_HAL_H
+#ifndef IIC_HAL_H
+#define IIC_HAL_H
 
 #include "stm32f4xx_hal.h"
 
@@ -19,7 +19,7 @@ void IICSendAck(iic_bus_t *bus);
 void IICSendNotAck(iic_bus_t *bus);
 void IICSendByte(iic_bus_t *bus, unsigned char cSendByte);
 unsigned char IICReceiveByte(iic_bus_t *bus);
-void IICInit(iic_bus_t *bus);
+void IICInit(const iic_bus_t *bus);
 
 uint8_t IIC_Write_One_Byte(iic_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t data);
 uint8_t IIC_Write_Multi_Byte(iic_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t length,uint8_t buff[]);

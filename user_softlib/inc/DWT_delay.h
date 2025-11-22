@@ -14,7 +14,6 @@ void DWT_Delay_Init(void) ;
 
 void DWT_Delay_us(uint32_t us);
 
-
 void DWT_Delay_ms(uint32_t ms);
 
 #endif //USER_MPUXXX_DWT_DELAY_H
