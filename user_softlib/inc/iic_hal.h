@@ -9,7 +9,7 @@ typedef struct
 	GPIO_TypeDef * IIC_SCL_PORT;
 	uint16_t IIC_SDA_PIN;
 	uint16_t IIC_SCL_PIN;
-	//void (*CLK_ENABLE)(void);
+	void (*CLK_ENABLE)(void);
 }iic_bus_t;
 
 void IICStart(iic_bus_t *bus);

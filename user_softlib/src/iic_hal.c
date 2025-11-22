@@ -321,7 +321,7 @@ void IICInit(const iic_bus_t *bus)
 {
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-		//bus->CLK_ENABLE();
+		bus->CLK_ENABLE();
 		
     GPIO_InitStructure.Pin = bus->IIC_SDA_PIN ;
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
