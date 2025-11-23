@@ -13,7 +13,8 @@ typedef enum
     IIC_IS_INITED,
     IIC_ERROR,
     IIC_NULL,
-    IIC_TIMEOUT
+    IIC_TIMEOUT,
+    IIC_NOTACK
 }iic_ll_status_t;
 
 typedef struct

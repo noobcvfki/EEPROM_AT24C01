@@ -31,7 +31,7 @@ iic_ll_status_t ll_iic_start(iic_ll_bus_t* iic_bus)
     return IIC_OK;
 }
 
-iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus)
+iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus,uint8_t data)
 {
     if (NULL == iic_bus)return IIC_NULL;
     uint32_t tickstart = HAL_GetTick();
@@ -41,10 +41,18 @@ iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus)
         }
         // 检查是否收到NACK（从机无响应）
         if (LL_I2C_IsActiveFlag_TXE(iic_bus->I2Cx)) {
-            LL_I2C_ClearFlag_NACK(hw_handle->instance);
-            return EEPROM_ERROR_NACK;
+            LL_I2C_ClearFlag_AF(iic_bus->I2Cx);
+            return IIC_NOTACK;
         }
     }
+    LL_I2C_TransmitData8(iic_bus->I2Cx, data);
+
+    while (!LL_I2C_IsActiveFlag_BTF(iic_bus->I2Cx)) {
+        if ((HAL_GetTick() - tickstart) > iic_bus->timeout_ms) {
+            return IIC_TIMEOUT;
+        }
+    }
+    return IIC_OK;
 }
 
 iic_ll_status_t iic_init(iic_ll_bus_t* iic_bus)
