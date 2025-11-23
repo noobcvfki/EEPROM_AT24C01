@@ -80,7 +80,7 @@ RETURN_ERROR:
     }
 }
 
-#define EEPROM_PAGE_SIZE 8
+
 
 static eeprom_status_t eeprom_write(bsp_eeprom_driver_t* p_eeprom,
                                     uint8_t write_data_addr,
