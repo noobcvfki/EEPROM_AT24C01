@@ -60,6 +60,7 @@ static eeprom_status_t eeprom_readid(bsp_eeprom_driver_t* p_eeprom)
         ERROR_LOG("eeprom not ack");
         return EEPROM_ERROR;
     }
+    DEBUG_LOG("iic is ack");
     return ret;
 
 }
@@ -69,7 +70,7 @@ static eeprom_status_t eeprom_init(bsp_eeprom_driver_t* p_eeprom)
     eeprom_status_t ret = EEPROM_OK;
     ret = IIC_INSTANCE->pf_iic_init(IIC_HANDLE);
     RETURN_CHECK(ret);
-    ret = eeprom_readid(IIC_HANDLE);
+    ret = eeprom_readid(p_eeprom);
     RETURN_CHECK(ret);
     return ret;
 RETURN_ERROR:
@@ -211,6 +212,8 @@ eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
     p_eeprom->pf_eeprom_readid = eeprom_readid;
     p_eeprom->pf_eeprom_write  = eeprom_write;
     p_eeprom->pf_eeprom_read   = eeprom_read;
+
+
 
     ret = eeprom_init(p_eeprom);
     if (EEPROM_OK!=ret)

@@ -25,7 +25,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "at24c02_driver.h"
+#include "elog.h"
+#include "unit.h"
+#include "user_debug.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +54,7 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 128 * 10,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -71,7 +74,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-
+  user_debug_init();
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -100,6 +103,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
+  elog_flush();
   /* USER CODE END RTOS_EVENTS */
 
 }
@@ -115,9 +119,25 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
+  unit_inst();
   for(;;)
   {
-    osDelay(1);
+    uint8_t write_data[3] = {0x33,0x33,0x33};
+    uint8_t read_data[3] = {0};
+    bsp_eeprom_driver.pf_eeprom_read(&bsp_eeprom_driver,
+      0xA0,&read_data,sizeof(read_data));
+    log_i("not write ,0xA0 data is [%X]",read_data);
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    bsp_eeprom_driver.pf_eeprom_write(&bsp_eeprom_driver,
+      0xA0,&write_data,sizeof(write_data));
+    vTaskDelay(pdMS_TO_TICKS(100));
+    bsp_eeprom_driver.pf_eeprom_read(&bsp_eeprom_driver,
+  0xA0,&read_data,sizeof(read_data));
+    log_i("is write ,0xA0 data is [%X]",read_data);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    elog_flush();
   }
   /* USER CODE END StartDefaultTask */
 }

@@ -10,7 +10,7 @@ target_include_directories(unit PUBLIC
 )
 
 target_link_libraries(unit PRIVATE
-        elog
+        user_debug
         STM32_Drivers
         softlib
         bsp_at24c02

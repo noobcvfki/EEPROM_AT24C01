@@ -23,14 +23,14 @@ iic_bus_t eeprom_iic = {
     .CLK_ENABLE = enable_iic_clock
 };
 
-static eeprom_status_t iic_init_myown(void* p_iic)
+__STATIC_INLINE eeprom_status_t iic_init_myown(void* p_iic)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     IICInit(iic_instance);
     return EEPROM_OK;
 }
 
-static eeprom_status_t iic_deinit_myown(void* p_iic)
+__STATIC_INLINE eeprom_status_t iic_deinit_myown(void* p_iic)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     HAL_GPIO_DeInit(iic_instance->IIC_SCL_PORT,iic_instance->IIC_SCL_PIN);
@@ -38,21 +38,21 @@ static eeprom_status_t iic_deinit_myown(void* p_iic)
     return EEPROM_OK;
 }
 
-static eeprom_status_t iic_start_myown(void* p_iic)
+__STATIC_INLINE eeprom_status_t iic_start_myown(void* p_iic)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     IICStart(iic_instance);
     return EEPROM_OK;
 }
 
-static eeprom_status_t iic_send_byte_myown(void *p_iic,uint8_t data)
+__STATIC_INLINE eeprom_status_t iic_send_byte_myown(void *p_iic,uint8_t data)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     IICSendByte(iic_instance ,data);
     return EEPROM_OK;
 }
 
-static eeprom_status_t iic_wait_ack_myown(void *p_iic)
+__STATIC_INLINE eeprom_status_t iic_wait_ack_myown(void *p_iic)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     if (0 != IICWaitAck(iic_instance))
@@ -62,40 +62,40 @@ static eeprom_status_t iic_wait_ack_myown(void *p_iic)
     return EEPROM_OK;
 }
 
-static eeprom_status_t iic_read_byte_myown(void *p_iic,uint8_t* pData)
+__STATIC_INLINE eeprom_status_t iic_read_byte_myown(void *p_iic,uint8_t* pData)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     *pData = IICReceiveByte(iic_instance);
     return EEPROM_OK;
 }
 
-static eeprom_status_t iic_send_ack_myown(void *p_iic)
+__STATIC_INLINE eeprom_status_t iic_send_ack_myown(void *p_iic)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     IICSendAck(iic_instance);
     return EEPROM_OK;
 }
 
-static eeprom_status_t iic_no_ack_myown(void *p_iic)
+__STATIC_INLINE eeprom_status_t iic_no_ack_myown(void *p_iic)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     IICSendNotAck(iic_instance);
     return EEPROM_OK;
 }
 
-static eeprom_status_t iic_stop_myown(void *p_iic)
+__STATIC_INLINE eeprom_status_t iic_stop_myown(void *p_iic)
 {
     iic_bus_t* iic_instance = (iic_bus_t*)(p_iic);
     IICStop(iic_instance);
     return EEPROM_OK;
 }
 
-static void critical_enable(void)
+__STATIC_INLINE void critical_enable(void)
 {
     taskENTER_CRITICAL();
 }
 
-static void critical_disable(void)
+__STATIC_INLINE void critical_disable(void)
 {
     taskEXIT_CRITICAL();
 }
@@ -114,3 +114,12 @@ eeprom_software_iic_driver_t bsp_eeprom_iic = {
     .critical_enable = critical_enable,
     .critical_disable = critical_disable
 };
+
+bsp_eeprom_driver_t bsp_eeprom_driver = {0};
+
+eeprom_status_t unit_inst(void)
+{
+    eeprom_status_t ret =
+        eeprom_inst(&bsp_eeprom_driver,0x50,&bsp_eeprom_iic);
+    return ret;
+}
