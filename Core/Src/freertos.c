@@ -125,16 +125,16 @@ void StartDefaultTask(void *argument)
     uint8_t write_data[3] = {0x33,0x33,0x33};
     uint8_t read_data[3] = {0};
     bsp_eeprom_driver.pf_eeprom_read(&bsp_eeprom_driver,
-      0xAF,read_data,sizeof(read_data));
-    log_i("not write ,0xAF data is [0x%X][0x%X][0x%X]",read_data[0],read_data[1],read_data[2]);
+      0x33,read_data,sizeof(read_data));
+    log_i("not write ,0x33 data is [0x%X][0x%X][0x%X]",read_data[0],read_data[1],read_data[2]);
     vTaskDelay(pdMS_TO_TICKS(100));
 
     bsp_eeprom_driver.pf_eeprom_write(&bsp_eeprom_driver,
-      0xAF,write_data,sizeof(write_data));
+      0x33,write_data,sizeof(write_data));
     vTaskDelay(pdMS_TO_TICKS(100));
     bsp_eeprom_driver.pf_eeprom_read(&bsp_eeprom_driver,
-  0xAF,read_data,sizeof(read_data));
-    log_i("is write ,0xAF data is [0x%X][0x%X][0x%X]",read_data[0],read_data[1],read_data[2]);
+  0x33,read_data,sizeof(read_data));
+    log_i("is write ,0x33 data is [0x%X][0x%X][0x%X]",read_data[0],read_data[1],read_data[2]);
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     elog_flush();
