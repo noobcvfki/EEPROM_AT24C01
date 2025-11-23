@@ -479,7 +479,7 @@ static mpuxxx_status_t mpu_driver_get_accel(bsp_mpuxxx_driver_t *p_mpuxxx,
 {
     mpuxxx_status_t ret = MPUxxx_OK;
     uint8_t data[6] = {0};
-    ret = MPUXXX_READ_REG(p_mpuxxx,MPU_MOTION_DET_REG, data,1);
+    ret = MPUXXX_READ_REG(p_mpuxxx,MPU_ACCEL_XOUTH_REG, data,1);
     if (MPUxxx_OK!= ret)
     {
         LOG_ERROR("get_accel set is ng");
