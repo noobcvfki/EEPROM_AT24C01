@@ -183,6 +183,7 @@ static eeprom_status_t eeprom_read(bsp_eeprom_driver_t* p_eeprom,
 #ifdef SOFTWARE_IIC
 eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
                                  uint8_t eeprom_7bit_addr,
+                                 os_yield_t* p_os_yield,
                       eeprom_software_iic_driver_t* p_iic)
 {
     DEBUG_LOG("=============eeprom inst start==========");
@@ -201,6 +202,7 @@ eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
     NULL_CHECK(p_iic->pf_iic_stop                       );
     NULL_CHECK(p_iic->critical_enable                   );
     NULL_CHECK(p_iic->critical_disable                  );
+    NULL_CHECK(p_os_yield->delay_ms);
 
     p_eeprom->p_eeprom_software_iic_driver = p_iic;
     p_eeprom->iic_handle       = p_iic->iic_handle;
@@ -211,6 +213,8 @@ eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
     p_eeprom->pf_eeprom_readid = eeprom_readid;
     p_eeprom->pf_eeprom_write  = eeprom_write;
     p_eeprom->pf_eeprom_read   = eeprom_read;
+
+    p_eeprom->p_os_yield = p_os_yield;
 
     ret = eeprom_init(p_eeprom);
     if (EEPROM_OK!=ret)
