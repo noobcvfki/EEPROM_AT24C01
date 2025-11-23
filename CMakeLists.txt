@@ -45,6 +45,8 @@ add_subdirectory(BSP/MPUxxx)
 add_subdirectory(BSP/AT24C02)
 #添加用户软件库
 add_subdirectory(user_softlib)
+#添加单元测试库
+add_subdirectory(System)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -80,4 +82,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         BSP_MPUxxx
         softlib
         bsp_at24c02
+        unit
 )
