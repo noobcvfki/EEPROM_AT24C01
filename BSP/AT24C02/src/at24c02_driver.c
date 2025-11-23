@@ -192,7 +192,7 @@ static eeprom_status_t eeprom_read(bsp_eeprom_driver_t* p_eeprom,
     {
         IIC_INSTANCE->pf_iic_read_byte(IIC_HANDLE,p_data+i);
         if (len-1 == i) break;
-        ret = IIC_INSTANCE->pf_iic_wait_ack(IIC_HANDLE);
+        ret = IIC_INSTANCE->pf_iic_send_ack(IIC_HANDLE);
         RETURN_CHECK(ret);
     }
     IIC_INSTANCE->pf_iic_no_ack(IIC_HANDLE);
