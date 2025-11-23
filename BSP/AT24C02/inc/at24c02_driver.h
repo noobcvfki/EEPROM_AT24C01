@@ -27,14 +27,12 @@ typedef enum
 //******************************** macro ************************************//
 #define EEPROM_READ_ADDR   0xA1
 #define EEPROM_WRITE_ADDR  0xA0
-#define SOFTWARE_IIC
 
 #define EEPROM_PAGE_SIZE 8
 //******************************** macro ************************************//
 //---------------------------------------------------------------------------//
 //******************************* struct ************************************//
-//软件IIC
-#ifdef SOFTWARE_IIC
+
 typedef struct
 {
     void* iic_handle;
@@ -50,39 +48,7 @@ typedef struct
     void            (*critical_enable )(void);
     void            (*critical_disable)(void);
 }eeprom_software_iic_driver_t;
-#else
-//硬件IIC
-typedef struct
-{
-    void *hi2c;             /* hi2c pointer to a I2C_HandleTypeDef structure */
-    eeprom_status_t (*pf_iic_init)      (void *);   /* IIC init    interface */
-    eeprom_status_t (*pf_iic_deinit)    (void *);   /* IIC deinit  interface */
 
-    eeprom_status_t (*pf_iic_mem_write)(void *hi2c,
-                            /*七位地址：*/uint16_t dst_address,
-                            /*内存地址：*/uint16_t mem_addr,
-                            /*内存大小：*/uint16_t mem_size,
-                            /*写入指针：*/uint8_t  *p_data,
-                            /*写入大小：*/uint16_t size,
-                            /*等待时间：*/uint32_t timeout);
-
-    eeprom_status_t (*pf_iic_mem_read) (void *hi2c,
-                            /*七位地址：*/uint16_t dst_address,
-                            /*内存地址：*/uint16_t mem_addr,
-                            /*内存大小：*/uint16_t mem_size,
-                            /*写入指针：*/uint8_t  *p_data,
-                            /*写入大小：*/uint16_t size,
-                            /*等待时间：*/uint32_t timeout);
-    // Use DMA to asynchronously read data from the I2C device's registers.
-    eeprom_status_t (*pf_iic_mem_read_dma)
-                                       (void *hi2c,
-                                        uint16_t dst_address,
-                                        uint16_t mem_addr,
-                                        uint16_t mem_size,
-                                        uint8_t  *p_data,
-                                        uint16_t size );
-}eeprom_hardware_iic_driver_t;
-#endif
 //******************************* struct ************************************//
 //---------------------------------------------------------------------------//
 //******************************* struct ************************************//
@@ -98,11 +64,7 @@ typedef struct bsp_eeprom_driver
     uint8_t iic_read_addr;
     uint8_t iic_write_addr;
     void* iic_handle;
-#ifdef SOFTWARE_IIC
     eeprom_software_iic_driver_t* p_eeprom_software_iic_driver;
-#else
-    eeprom_hardware_iic_driver_t* p_eeprom_hardware_iic_driver;
-#endif
     os_yield_t* p_os_yield;
 
     eeprom_status_t (*pf_eeprom_init)(bsp_eeprom_driver_t* p_eeprom);
@@ -116,14 +78,9 @@ typedef struct bsp_eeprom_driver
 
 }bsp_eeprom_driver_t;
 
-#ifdef SOFTWARE_IIC
+
 eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
                                  uint8_t eeprom_7bit_addr,
                                  os_yield_t* p_os_yield,
                       eeprom_software_iic_driver_t* p_iic);
-#else
-eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
-                                 uint8_t eeprom_7bit_addr,
-                      eeprom_hardware_iic_driver_t* p_iic);
-#endif
 #endif //USER_MPUXXX_AT24C02_DRIVER_H

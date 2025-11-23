@@ -218,7 +218,7 @@ static eeprom_status_t eeprom_read(bsp_eeprom_driver_t* p_eeprom,
 
 
 
-#ifdef SOFTWARE_IIC
+
 eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
                                  uint8_t eeprom_7bit_addr,
                                  os_yield_t* p_os_yield,
@@ -270,8 +270,3 @@ NULL_ERROR:
         return EEPROM_ERROR;
     }
 }
-#else
-eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
-                                 uint8_t eeprom_7bit_addr,
-                      eeprom_hardware_iic_driver_t* p_iic);
-#endif
