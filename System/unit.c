@@ -100,6 +100,11 @@ __STATIC_INLINE void critical_disable(void)
     taskEXIT_CRITICAL();
 }
 
+__STATIC_INLINE void delay_ms_myown(uint32_t ms)
+{
+    vTaskDelay(pdMS_TO_TICKS(ms));
+}
+
 eeprom_software_iic_driver_t bsp_eeprom_iic = {
     .iic_handle = &eeprom_iic,
     .pf_iic_init = iic_init_myown,
@@ -115,11 +120,15 @@ eeprom_software_iic_driver_t bsp_eeprom_iic = {
     .critical_disable = critical_disable
 };
 
+os_yield_t bsp_os_yield = {
+    .delay_ms = delay_ms_myown
+};
+
 bsp_eeprom_driver_t bsp_eeprom_driver = {0};
 
 eeprom_status_t unit_inst(void)
 {
     eeprom_status_t ret =
-        eeprom_inst(&bsp_eeprom_driver,0x50,&bsp_eeprom_iic);
+        eeprom_inst(&bsp_eeprom_driver,0x50,&bsp_os_yield,&bsp_eeprom_iic);
     return ret;
 }

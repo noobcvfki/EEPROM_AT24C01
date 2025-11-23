@@ -86,6 +86,11 @@ typedef struct
 //******************************* struct ************************************//
 typedef struct bsp_eeprom_driver bsp_eeprom_driver_t ;
 
+typedef struct
+{
+    void (*delay_ms)(uint32_t ms);
+}os_yield_t;
+
 typedef struct bsp_eeprom_driver
 {
     uint8_t iic_read_addr;
@@ -96,6 +101,8 @@ typedef struct bsp_eeprom_driver
 #else
     eeprom_hardware_iic_driver_t* p_eeprom_hardware_iic_driver;
 #endif
+    os_yield_t* p_os_yield;
+
     eeprom_status_t (*pf_eeprom_init)(bsp_eeprom_driver_t* p_eeprom);
     eeprom_status_t (*pf_eeprom_readid)(bsp_eeprom_driver_t* p_eeprom);
     eeprom_status_t (*pf_eeprom_write)(bsp_eeprom_driver_t* p_eeprom,
@@ -107,9 +114,12 @@ typedef struct bsp_eeprom_driver
 
 }bsp_eeprom_driver_t;
 
+
+
 #ifdef SOFTWARE_IIC
 eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
                                  uint8_t eeprom_7bit_addr,
+                                 os_yield_t* os_yield,
                       eeprom_software_iic_driver_t* p_iic);
 #else
 eeprom_status_t eeprom_inst(bsp_eeprom_driver_t* p_eeprom,
