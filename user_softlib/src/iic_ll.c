@@ -65,10 +65,12 @@ iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus, uint8_t data)
     //  移除BTF等待，由数据应答函数处理
     return IIC_OK;
 }
-
-iic_ll_status_t iic_init(iic_ll_bus_t* iic_bus)
+//最好还是使用CubeMX生成初始化代码，这里仅仅只是Enable
+iic_ll_status_t ll_iic_init(iic_ll_bus_t* iic_bus)
 {
-    if (NULL == iic_bus || NULL == iic_bus->I2Cx || NULL == iic_bus->I2CInit_struct)
+    if (NULL == iic_bus       ||
+        NULL == iic_bus->I2Cx ||
+        NULL == iic_bus->I2CInit_struct)
     {
         return IIC_NULL;
     }
@@ -91,7 +93,7 @@ iic_ll_status_t iic_init(iic_ll_bus_t* iic_bus)
     return IIC_OK;
 }
 
-/************************** 补充核心函数 **************************/
+
 /**
  * @brief  生成I2C STOP条件
  * @param  iic_bus: I2C总线句柄
@@ -266,7 +268,11 @@ iic_ll_status_t ll_iic_clear_error_flags(iic_ll_bus_t* iic_bus)
  * @param  len: 发送数据长度（>0）
  * @retval iic_ll_status_t: 操作状态
  */
-__WEAK iic_ll_status_t ll_iic_write_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, const uint8_t* p_data, uint16_t len)
+__WEAK iic_ll_status_t ll_iic_write_multi_bytes(
+                                    iic_ll_bus_t *iic_bus,
+                                         uint8_t slave_addr,
+                                   const uint8_t *p_data,
+                                        uint16_t len)
 {
     if (!iic_bus || !iic_bus->I2Cx || !p_data || len == 0)
         return IIC_NULL;
@@ -278,14 +284,15 @@ __WEAK iic_ll_status_t ll_iic_write_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t s
     if (status != IIC_OK) return status;
 
     // 2. 发送从机地址 + 写位
-    status = ll_iic_send_byte(iic_bus, (slave_addr << 1) | LL_I2C_DIRECTION_WRITE);
+    status = ll_iic_send_byte(iic_bus,
+                               (slave_addr << 1) | LL_I2C_DIRECTION_WRITE);
     if (status != IIC_OK) {
         ll_iic_stop(iic_bus);
         return status;
     }
 
     // 3. 等待地址 ACK
-    status = ll_iic_wait_addr_ack(iic_bus);  // 注意：你后面用了 ll_iic_wait_ack，但未定义！
+    status = ll_iic_wait_addr_ack(iic_bus);
     if (status != IIC_OK) {
         ll_iic_stop(iic_bus);
         return status;
@@ -320,7 +327,11 @@ __WEAK iic_ll_status_t ll_iic_write_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t s
  * @param  len: 接收数据长度（>0）
  * @retval iic_ll_status_t: 操作状态
  */
-__WEAK iic_ll_status_t ll_iic_read_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, uint8_t* p_data, uint16_t len)
+__WEAK iic_ll_status_t ll_iic_read_multi_bytes(
+                                               iic_ll_bus_t* iic_bus,
+                                                    uint8_t  slave_addr,
+                                                    uint8_t* p_data,
+                                                   uint16_t len)
 {
     if (NULL == iic_bus || NULL == iic_bus->I2Cx || NULL == p_data || len == 0)
         return IIC_NULL;
@@ -334,7 +345,8 @@ __WEAK iic_ll_status_t ll_iic_read_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t sl
         return status;
 
     // 2. 发送从机地址+读位（7位地址左移1位 + 1）
-    status = ll_iic_send_byte(iic_bus, (slave_addr << 1) | LL_I2C_DIRECTION_READ);
+    status = ll_iic_send_byte(iic_bus,
+                                (slave_addr << 1) | LL_I2C_DIRECTION_READ);
     if (status != IIC_OK)
     {
         ll_iic_stop(iic_bus);

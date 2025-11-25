@@ -24,4 +24,18 @@ typedef struct
     uint32_t timeout_ms;
 }iic_ll_bus_t;
 
+iic_ll_status_t ll_iic_start(iic_ll_bus_t* iic_bus);
+iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus, uint8_t data);
+iic_ll_status_t ll_iic_init(iic_ll_bus_t* iic_bus);
+iic_ll_status_t ll_iic_stop(iic_ll_bus_t* iic_bus);
+iic_ll_status_t ll_iic_wait_addr_ack(iic_ll_bus_t* iic_bus);
+iic_ll_status_t ll_iic_wait_data_ack(iic_ll_bus_t* iic_bus);
+iic_ll_status_t ll_iic_send_ack(iic_ll_bus_t* iic_bus);
+iic_ll_status_t ll_iic_send_nack(iic_ll_bus_t* iic_bus);
+iic_ll_status_t ll_iic_read_byte(iic_ll_bus_t* iic_bus, uint8_t* p_data);
+iic_ll_status_t ll_iic_clear_error_flags(iic_ll_bus_t* iic_bus);
+__WEAK iic_ll_status_t ll_iic_write_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, const uint8_t* p_data, uint16_t len);
+__WEAK iic_ll_status_t ll_iic_read_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, uint8_t* p_data, uint16_t len);
+
+
 #endif //USER_MPUXXX_IIC_LL_H
