@@ -10,4 +10,5 @@ target_include_directories(BSP_MPUxxx PUBLIC
 
 target_link_libraries(BSP_MPUxxx PRIVATE
     elog
+    softlib
 )

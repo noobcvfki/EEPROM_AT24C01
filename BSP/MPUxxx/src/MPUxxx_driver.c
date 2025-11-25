@@ -29,6 +29,7 @@
 #include "MPUxxx_driver.h"
 #include "bsp_mpu6050_reg.h"
 #include "elog.h"
+#include "circular_buffer.h"
 //******************************** Includes *********************************//
 //---------------------------------------------------------------------------//
 //******************************** Defines **********************************//
@@ -81,7 +82,12 @@
     TIME_OUT_MS\
 )
 
+#ifdef DEBUG
+#undef DEBUG
 #define DEBUG
+#else
+#define DEBUG
+#endif
 
 #ifdef DEBUG
 #define LOG_DEBUG(x,...)  log_d(x, ##__VA_ARGS__)
@@ -878,8 +884,46 @@ void int_interrupt_callback(void* mpu_driver,void* mpu_data)
     NULL_CHECK(mpu_data);
 
     p_mpu_driver = (bsp_mpuxxx_driver_t*) mpu_driver;
+    uint8_t* wbuff = NULL;
+    uint8_t  data  = 0;
+    wbuff = mpuxxx_buf.pfget_wbuffer_addr(&mpuxxx_buf);
+    ret = mpu_driver_set_interrupt_enable(p_mpu_driver,0x00);
+    if (ret != MPUxxx_OK)
+    {
+        LOG_ERROR("int_interrupt_callback read inter is error");
+        LOG_ERROR("ret = %d",ret);
+    }
+    ret = mpu_driver_get_interrupt_status_reg(p_mpu_driver,&data);
+    if (ret != MPUxxx_OK)
+    {
+        LOG_ERROR("int_interrupt_callback read inter is error");
+        LOG_ERROR("ret = %d",ret);
+    }
+    ret = mpu_driver_get_interrupt_status_reg(p_mpu_driver,&data);
+    if (ret != MPUxxx_OK)
+    {
+        LOG_ERROR("int_interrupt_callback read inter is error");
+        LOG_ERROR("ret = %d",ret);
+    }
 
+    uint32_t timetamp_start =
+        p_mpu_driver->p_timebase_interface->pf_get_tick_count_ms();
+    LOG_DEBUG("get timestamp start:%d",timetamp_start);
+    ret = p_mpu_driver->p_iic_driver_interface->pf_iic_mem_read_dma(
+        p_mpu_driver->p_iic_driver_interface->hi2c,
+        (MPU_ADDR << 1) | 1,
+        MPU_ACCEL_XOUTH_REG,
+        IIC_MEMADD_SIZE_8BIT,
+        wbuff,
+        MPU6050_DATA_PACKET_SIZE);
 
+    if (ret != MPUxxx_OK)
+    {
+        LOG_ERROR("int_interrupt_callback read inter is error");
+        LOG_ERROR("ret = %d",ret);
+    }
+
+    LOG_DEBUG("===int interrupt callback===");
 RETURN_ERROR:
     {
         LOG_ERROR("int_interrupt_callback input NULL");

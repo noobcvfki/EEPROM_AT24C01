@@ -33,6 +33,8 @@
 // MPU6050数据包大小定义
 #define MPU6050_DATA_PACKET_SIZE    14  // 加速度(6) + 温度(2) + 陀螺仪(6) = 14字节
 
+
+
 typedef struct circular_buffer
 {
     uint8_t *buffer; // 缓冲区
@@ -44,6 +46,8 @@ typedef struct circular_buffer
     void (*pfdata_readed)(struct circular_buffer *);          // 读数据
     uint8_t size;    // 缓冲区槽位数量
 } circular_buffer_t;
+
+extern circular_buffer_t mpuxxx_buf;
 
 void buffer_init(circular_buffer_t *buffer, uint8_t size);
 

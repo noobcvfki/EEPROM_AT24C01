@@ -11,4 +11,5 @@ target_include_directories(bsp_at24c02 PUBLIC
 
 target_link_libraries(bsp_at24c02 PRIVATE
         elog
+        softlib
 )

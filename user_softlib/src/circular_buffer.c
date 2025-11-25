@@ -57,6 +57,7 @@ void buffer_init(circular_buffer_t *buffer, uint8_t size)
     if (NULL == buffer)
     {
         DEBUG_PRINT("buffer is NULL");
+        return;
     }
 
     buffer->size = size;  // 槽位数量

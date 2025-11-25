@@ -14,7 +14,13 @@
     #define LOG_TAG "eeprom_driver"
 #endif
 
+#ifdef DEBUG
+#undef DEBUG
 #define DEBUG
+#else
+#define DEBUG
+#endif
+
 
 #ifdef DEBUG
     #define DEBUG_LOG(x,...)   log_d(x,##__VA_ARGS__)
