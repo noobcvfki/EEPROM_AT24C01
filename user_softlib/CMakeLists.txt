@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 
 
 add_library(softlib STATIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/iic_hal.c  # debug 模块自身的逻辑（若有）
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/iic_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/DWT_delay.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/iic_ll.c
+#        ${CMAKE_CURRENT_SOURCE_DIR}/src/iic_ll.c
 )
 
 # ------------------------------
