@@ -62,7 +62,7 @@ iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus, uint8_t data)
     // 发送数据
     LL_I2C_TransmitData8(iic_bus->I2Cx, data);
 
-    // ✅ 移除BTF等待，由数据应答函数处理
+    //  移除BTF等待，由数据应答函数处理
     return IIC_OK;
 }
 
@@ -251,47 +251,30 @@ iic_ll_status_t ll_iic_read_byte(iic_ll_bus_t* iic_bus, uint8_t* p_data)
  */
 iic_ll_status_t ll_iic_write_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, const uint8_t* p_data, uint16_t len)
 {
-    if (NULL == iic_bus || NULL == iic_bus->I2Cx || NULL == p_data || len == 0)
+    if (NULL == iic_bus || NULL == iic_bus->I2Cx)
         return IIC_NULL;
 
-    iic_ll_status_t status;
-    uint16_t i;
+    uint32_t tickstart = HAL_GetTick();
 
-    // 1. 生成START条件
-    status = ll_iic_start(iic_bus);
-    if (status != IIC_OK)
-        return status;
-
-    // 2. 发送从机地址+写位（7位地址左移1位 + 0）
-    status = ll_iic_send_byte(iic_bus, (slave_addr << 1) | LL_I2C_DIRECTION_WRITE);
-    if (status != IIC_OK)
+    // 等待TXE标志（数据寄存器空）
+    while (!LL_I2C_IsActiveFlag_TXE(iic_bus->I2Cx))
     {
-        ll_iic_stop(iic_bus); // 发送失败，生成STOP
-        return status;
-    }
-
-    // 3. 等待从机ACK
-    status = ll_iic_wait_ack(iic_bus);
-    if (status != IIC_OK)
-    {
-        ll_iic_stop(iic_bus);
-        return status;
-    }
-
-    // 4. 连续发送len字节数据
-    for (i = 0; i < len; i++)
-    {
-        status = ll_iic_send_byte(iic_bus, p_data[i]);
-        if (status != IIC_OK)
+        if (LL_I2C_IsActiveFlag_AF(iic_bus->I2Cx))
         {
-            ll_iic_stop(iic_bus);
-            return status;
+            LL_I2C_ClearFlag_AF(iic_bus->I2Cx);
+            return IIC_NOTACK;
+        }
+        if ((HAL_GetTick() - tickstart) > iic_bus->timeout_ms)
+        {
+            return IIC_TIMEOUT;
         }
     }
 
-    // 5. 生成STOP条件，结束传输
-    status = ll_iic_stop(iic_bus);
-    return status;
+    // 发送数据
+    LL_I2C_TransmitData8(iic_bus->I2Cx, data);
+
+    // 移除BTF等待，由数据应答函数处理
+    return IIC_OK;
 }
 
 /**
