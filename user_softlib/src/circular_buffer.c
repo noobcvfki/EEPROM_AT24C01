@@ -1,46 +1,73 @@
-//
-// Created by capting on 2025/11/25.
-//
-
+/******************************************************************************
+* Copyright (C) 2024 EternalChip, Inc.(Gmbh) or its affiliates.
+ *
+ * All Rights Reserved.
+ *
+ * @file circular_buffer.c
+ *
+ * @par dependencies
+ *
+ * - circular_buffer.h
+ *
+ * @author liu
+ *
+ * @brief Provide the circular buffer APIs.
+ *
+ * Processing flow:
+ *
+ * call directly.
+ *
+ * @version V1.0 2024-12-06
+ *
+ * @note 1 tab == 4 spaces!
+ *
+ *****************************************************************************/
 #include "circular_buffer.h"
 #include <string.h>
 #include <stdlib.h>
 
-static uint8_t* get_wbuffer_addr(circular_buffer_t* pBuffer)
+circular_buffer_t circular_buf;
+
+uint8_t *get_wbuffer_addr(circular_buffer_t *buffer)
 {
-    return pBuffer->buffer + pBuffer->wflag * pBuffer->size;
+    return buffer->buffer + buffer->wflag * MPU6050_DATA_PACKET_SIZE;
 }
 
-static uint8_t* get_rbuffer_addr(circular_buffer_t* pBuffer)
+uint8_t *get_rbuffer_addr(circular_buffer_t *buffer)
 {
-    return pBuffer->buffer + pBuffer->rflag * pBuffer->size;
+    return buffer->buffer + buffer->rflag * MPU6050_DATA_PACKET_SIZE;
 }
 
-static void data_write_addr_updata(circular_buffer_t* pBuffer)
+void data_writed(circular_buffer_t *buffer)
 {
-    pBuffer->wflag = (pBuffer->wflag + 1) % pBuffer->size;
+    // DMA写数据结束
+    // todo:buffer已满
+    buffer->wflag = (buffer->wflag + 1) % buffer->size;
 }
 
-static void data_read_addr_updata(circular_buffer_t* pBuffer)
+void data_readed(circular_buffer_t *buffer)
 {
-    pBuffer->rflag = (pBuffer->rflag + 1) % pBuffer->size;
+    // 读取数据结束
+    // todo: 没有可读数据
+    buffer->rflag = (buffer->rflag + 1) % buffer->size;
 }
 
-void buffer_init(circular_buffer_t* buffer,uint8_t size)
+void buffer_init(circular_buffer_t *buffer, uint8_t size)
 {
     if (NULL == buffer)
     {
-        DEBUG_LOG("buffer is NULL");
-        return;
+        DEBUG_PRINT("buffer is NULL");
     }
-    buffer->size = size;
+
+    buffer->size = size;  // 槽位数量
     buffer->rflag = 0;
     buffer->wflag = 0;
 
-    buffer->buffer = (uint8_t*)malloc(size);
+    /*buffer 分配空间: 槽位数量 × 每个槽位的数据包大小*/
+    buffer->buffer = (uint8_t *)malloc(size * MPU6050_DATA_PACKET_SIZE);
 
-    buffer->pf_get_rbuffer_addr = get_rbuffer_addr;
-    buffer->pf_get_wbuffer_addr = get_wbuffer_addr;
-    buffer->pf_data_read_addr_updata = data_read_addr_updata;
-    buffer->pf_data_write_addr_updata = data_write_addr_updata;
+    buffer->pfget_rbuffer_addr = get_rbuffer_addr;
+    buffer->pfget_wbuffer_addr = get_wbuffer_addr;
+    buffer->pfdata_readed      = data_readed;
+    buffer->pfdata_writed      = data_writed;
 }
