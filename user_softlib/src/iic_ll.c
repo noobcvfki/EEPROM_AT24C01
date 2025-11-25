@@ -7,6 +7,11 @@
 #include "stm32f4xx_ll_i2c.h"
 
 
+/**
+ * @brief  生成I2C START条件并等待发送完成
+ * @param  iic_bus: I2C总线句柄
+ * @retval iic_ll_status_t: 操作状态
+ */
 iic_ll_status_t ll_iic_start(iic_ll_bus_t* iic_bus)
 {
     if (NULL == iic_bus || NULL == iic_bus->I2Cx)
@@ -38,6 +43,12 @@ iic_ll_status_t ll_iic_start(iic_ll_bus_t* iic_bus)
     return IIC_OK;
 }
 
+/**
+ * @brief  发送一个字节数据
+ * @param  iic_bus: I2C总线句柄
+ * @param  data: 待发送的数据字节
+ * @retval iic_ll_status_t: 操作状态
+ */
 iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus, uint8_t data)
 {
     if (NULL == iic_bus || NULL == iic_bus->I2Cx)
@@ -65,7 +76,13 @@ iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus, uint8_t data)
     //  移除BTF等待，由数据应答函数处理
     return IIC_OK;
 }
-//最好还是使用CubeMX生成初始化代码，这里仅仅只是Enable
+
+/**
+ * @brief  初始化I2C总线
+ * @param  iic_bus: I2C总线句柄
+ * @retval iic_ll_status_t: 操作状态
+ * @note   最好还是使用CubeMX生成初始化代码，这里仅仅只是Enable
+ */
 iic_ll_status_t ll_iic_init(iic_ll_bus_t* iic_bus)
 {
     if (NULL == iic_bus       ||
@@ -111,6 +128,8 @@ iic_ll_status_t ll_iic_stop(iic_ll_bus_t* iic_bus)
 
 /**
  * @brief  等待地址应答（发送从机地址后调用）
+ * @param  iic_bus: I2C总线句柄
+ * @retval iic_ll_status_t: 操作状态
  */
 iic_ll_status_t ll_iic_wait_addr_ack(iic_ll_bus_t* iic_bus)
 {
@@ -142,6 +161,8 @@ iic_ll_status_t ll_iic_wait_addr_ack(iic_ll_bus_t* iic_bus)
 
 /**
  * @brief  等待数据应答（发送数据字节后调用）
+ * @param  iic_bus: I2C总线句柄
+ * @retval iic_ll_status_t: 操作状态
  */
 iic_ll_status_t ll_iic_wait_data_ack(iic_ll_bus_t* iic_bus)
 {
