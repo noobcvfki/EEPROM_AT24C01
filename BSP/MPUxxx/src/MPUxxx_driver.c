@@ -110,6 +110,7 @@
 static double g_gyro_scale = 131.0;
 static double g_accel_scale = 16384.0;
 static uint8_t g_is_init_flag = MPUXXX_NOT_INIT;
+static uint32_t g_is_dma_readed = 0;
 //******************************* variable **********************************//
 //---------------------------------------------------------------------------//
 //******************************* Functions *********************************//
@@ -299,7 +300,8 @@ static mpuxxx_status_t mpu_driver_set_interrupt_enable(bsp_mpuxxx_driver_t *p_mp
  * @param[in] data 运动检测阈值设置值
  * @return 执行状态
  */
-static mpuxxx_status_t mpu_driver_set_motion_threshold(bsp_mpuxxx_driver_t *p_mpuxxx,
+static mpuxxx_status_t mpu_driver_set_motion_threshold(
+                                                 bsp_mpuxxx_driver_t *p_mpuxxx,
                                                              uint8_t data)
 {
     mpuxxx_status_t ret = MPUxxx_OK;
@@ -927,6 +929,35 @@ void int_interrupt_callback(void* mpu_driver,void* mpu_data)
 RETURN_ERROR:
     {
         LOG_ERROR("int_interrupt_callback input NULL");
+    }
+}
+
+void dma_interrupt_callback(void* mpu_driver,void* mpu_data)
+{
+    LOG_DEBUG("----------dma_interrupt_callback start----------");
+    mpuxxx_status_t ret = MPUxxx_OK;
+    bsp_mpuxxx_driver_t *p_mpu_driver = NULL;
+    NULL_CHECK(mpu_driver);
+    NULL_CHECK(mpu_data);
+
+    p_mpu_driver = (bsp_mpuxxx_driver_t*)mpu_driver;
+    uint32_t timestamp_end =
+        p_mpu_driver->p_timebase_interface->pf_get_tick_count_ms();
+    LOG_DEBUG("get timestamp end:%d",timestamp_end);
+
+    ret = mpu_driver_set_interrupt_enable(p_mpu_driver,0x01);
+    if (ret!=MPUxxx_OK)
+    {
+        LOG_ERROR("mpu set interrupt is ng");
+    }
+    mpuxxx_buf.pfdata_writed(&mpuxxx_buf);
+    g_is_dma_readed = 0;
+
+    LOG_DEBUG("-----dma_interrupt_callback end-----");
+
+    RETURN_ERROR:
+    {
+        LOG_ERROR("dma_interrupt_callback input NULL");
     }
 }
 
