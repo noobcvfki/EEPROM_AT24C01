@@ -6,10 +6,10 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_ll_i2c.h"
 
-/************************** 现有函数修正 **************************/
+
 iic_ll_status_t ll_iic_start(iic_ll_bus_t* iic_bus)
 {
-    if (NULL == iic_bus || NULL == iic_bus->I2Cx) // 补充iic_bus空指针检查
+    if (NULL == iic_bus || NULL == iic_bus->I2Cx)
         return IIC_NULL;
 
     uint32_t tickstart = HAL_GetTick();
@@ -99,22 +99,10 @@ iic_ll_status_t iic_init(iic_ll_bus_t* iic_bus)
  */
 iic_ll_status_t ll_iic_stop(iic_ll_bus_t* iic_bus)
 {
-    if (NULL == iic_bus || NULL == iic_bus->I2Cx)
+    if (!iic_bus || !iic_bus->I2Cx)
         return IIC_NULL;
 
-    uint32_t tickstart = HAL_GetTick();
-
-    // 生成STOP条件
     LL_I2C_GenerateStopCondition(iic_bus->I2Cx);
-
-    // 等待STOP信号发送完成（STOP标志清除）
-    while (LL_I2C_IsActiveFlag_STOP(iic_bus->I2Cx))
-    {
-        if ((HAL_GetTick() - tickstart) > iic_bus->timeout_ms)
-        {
-            return IIC_TIMEOUT;
-        }
-    }
 
     return IIC_OK;
 }
@@ -162,7 +150,7 @@ iic_ll_status_t ll_iic_wait_data_ack(iic_ll_bus_t* iic_bus)
 
     while (1)
     {
-        // ✅ 关键修正：使用BTF而不是TXE
+        //  关键修正：使用BTF而不是TXE
         if (LL_I2C_IsActiveFlag_BTF(iic_bus->I2Cx))
         {
             return IIC_OK;
@@ -189,7 +177,10 @@ iic_ll_status_t ll_iic_wait_data_ack(iic_ll_bus_t* iic_bus)
 iic_ll_status_t ll_iic_send_ack(iic_ll_bus_t* iic_bus)
 {
     if (NULL == iic_bus || NULL == iic_bus->I2Cx)
+    {
         return IIC_NULL;
+    }
+
 
     // 配置下一个字节接收后发送ACK
     LL_I2C_AcknowledgeNextData(iic_bus->I2Cx, LL_I2C_ACK);
@@ -242,6 +233,32 @@ iic_ll_status_t ll_iic_read_byte(iic_ll_bus_t* iic_bus, uint8_t* p_data)
 }
 
 /**
+ * @brief  清除I2C错误标志（AF/BERR/ARLO/OVR）
+ * @param  iic_bus: I2C总线句柄
+ * @retval iic_ll_status_t: 操作状态
+ */
+iic_ll_status_t ll_iic_clear_error_flags(iic_ll_bus_t* iic_bus)
+{
+    if (NULL == iic_bus || NULL == iic_bus->I2Cx)
+        return IIC_NULL;
+
+    // 清除常见错误标志
+    LL_I2C_ClearFlag_AF(iic_bus->I2Cx);
+    LL_I2C_ClearFlag_BERR(iic_bus->I2Cx);
+    LL_I2C_ClearFlag_ARLO(iic_bus->I2Cx);
+    LL_I2C_ClearFlag_OVR(iic_bus->I2Cx);
+
+    return IIC_OK;
+}
+
+
+/*
+ *
+ * @ 由于不同的代码时序可能不同，一下的代码建议自己根据相关器件的时序自定义
+ *
+ */
+
+/**
  * @brief  多字节写入（主机→从机）
  * @param  iic_bus: I2C总线句柄
  * @param  slave_addr: 从机7位地址（不含读写位）
@@ -249,32 +266,50 @@ iic_ll_status_t ll_iic_read_byte(iic_ll_bus_t* iic_bus, uint8_t* p_data)
  * @param  len: 发送数据长度（>0）
  * @retval iic_ll_status_t: 操作状态
  */
-iic_ll_status_t ll_iic_write_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, const uint8_t* p_data, uint16_t len)
+__WEAK iic_ll_status_t ll_iic_write_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, const uint8_t* p_data, uint16_t len)
 {
-    if (NULL == iic_bus || NULL == iic_bus->I2Cx)
+    if (!iic_bus || !iic_bus->I2Cx || !p_data || len == 0)
         return IIC_NULL;
 
-    uint32_t tickstart = HAL_GetTick();
+    iic_ll_status_t status;
 
-    // 等待TXE标志（数据寄存器空）
-    while (!LL_I2C_IsActiveFlag_TXE(iic_bus->I2Cx))
-    {
-        if (LL_I2C_IsActiveFlag_AF(iic_bus->I2Cx))
-        {
-            LL_I2C_ClearFlag_AF(iic_bus->I2Cx);
-            return IIC_NOTACK;
+    // 1. START
+    status = ll_iic_start(iic_bus);
+    if (status != IIC_OK) return status;
+
+    // 2. 发送从机地址 + 写位
+    status = ll_iic_send_byte(iic_bus, (slave_addr << 1) | LL_I2C_DIRECTION_WRITE);
+    if (status != IIC_OK) {
+        ll_iic_stop(iic_bus);
+        return status;
+    }
+
+    // 3. 等待地址 ACK
+    status = ll_iic_wait_addr_ack(iic_bus);  // 注意：你后面用了 ll_iic_wait_ack，但未定义！
+    if (status != IIC_OK) {
+        ll_iic_stop(iic_bus);
+        return status;
+    }
+
+    // 4. 发送所有数据字节
+    for (uint16_t i = 0; i < len; i++) {
+        status = ll_iic_send_byte(iic_bus, p_data[i]);
+        if (status != IIC_OK) {
+            ll_iic_stop(iic_bus);
+            return status;
         }
-        if ((HAL_GetTick() - tickstart) > iic_bus->timeout_ms)
-        {
-            return IIC_TIMEOUT;
+
+        // 等待每个字节的 ACK（BTF + AF 检查）
+        status = ll_iic_wait_data_ack(iic_bus);
+        if (status != IIC_OK) {
+            ll_iic_stop(iic_bus);
+            return status;
         }
     }
 
-    // 发送数据
-    LL_I2C_TransmitData8(iic_bus->I2Cx, data);
-
-    // 移除BTF等待，由数据应答函数处理
-    return IIC_OK;
+    // 5. STOP
+    status = ll_iic_stop(iic_bus);
+    return status;
 }
 
 /**
@@ -285,7 +320,7 @@ iic_ll_status_t ll_iic_write_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_ad
  * @param  len: 接收数据长度（>0）
  * @retval iic_ll_status_t: 操作状态
  */
-iic_ll_status_t ll_iic_read_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, uint8_t* p_data, uint16_t len)
+__WEAK iic_ll_status_t ll_iic_read_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_addr, uint8_t* p_data, uint16_t len)
 {
     if (NULL == iic_bus || NULL == iic_bus->I2Cx || NULL == p_data || len == 0)
         return IIC_NULL;
@@ -307,7 +342,7 @@ iic_ll_status_t ll_iic_read_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_add
     }
 
     // 3. 等待从机ACK
-    status = ll_iic_wait_ack(iic_bus);
+    status = ll_iic_wait_addr_ack(iic_bus);
     if (status != IIC_OK)
     {
         ll_iic_stop(iic_bus);
@@ -351,21 +386,3 @@ iic_ll_status_t ll_iic_read_multi_bytes(iic_ll_bus_t* iic_bus, uint8_t slave_add
     return status;
 }
 
-/**
- * @brief  清除I2C错误标志（AF/BERR/ARLO/OVR）
- * @param  iic_bus: I2C总线句柄
- * @retval iic_ll_status_t: 操作状态
- */
-iic_ll_status_t ll_iic_clear_error_flags(iic_ll_bus_t* iic_bus)
-{
-    if (NULL == iic_bus || NULL == iic_bus->I2Cx)
-        return IIC_NULL;
-
-    // 清除常见错误标志
-    LL_I2C_ClearFlag_AF(iic_bus->I2Cx);
-    LL_I2C_ClearFlag_BERR(iic_bus->I2Cx);
-    LL_I2C_ClearFlag_ARLO(iic_bus->I2Cx);
-    LL_I2C_ClearFlag_OVR(iic_bus->I2Cx);
-
-    return IIC_OK;
-}
