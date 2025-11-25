@@ -1,0 +1,10 @@
+//
+// Created by capting on 2025/11/25.
+//
+
+#ifndef USER_MPUXXX_CIRCULAR_BUFFER_H
+#define USER_MPUXXX_CIRCULAR_BUFFER_H
+
+
+
+#endif //USER_MPUXXX_CIRCULAR_BUFFER_H
