@@ -45,11 +45,10 @@ iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus, uint8_t data)
 
     uint32_t tickstart = HAL_GetTick();
 
-    // 等待TXE标志（发送数据寄存器空）
+    // 等待TXE标志（数据寄存器空）
     while (!LL_I2C_IsActiveFlag_TXE(iic_bus->I2Cx))
     {
-        // 检查NACK（从机无应答）
-        if (LL_I2C_IsActiveFlag_AF(iic_bus->I2Cx)) // 修正：判断AF标志（原代码误判TXE）
+        if (LL_I2C_IsActiveFlag_AF(iic_bus->I2Cx))
         {
             LL_I2C_ClearFlag_AF(iic_bus->I2Cx);
             return IIC_NOTACK;
@@ -63,15 +62,7 @@ iic_ll_status_t ll_iic_send_byte(iic_ll_bus_t* iic_bus, uint8_t data)
     // 发送数据
     LL_I2C_TransmitData8(iic_bus->I2Cx, data);
 
-    // 等待字节传输完成（BTF标志置1，确保数据发送到总线）
-    while (!LL_I2C_IsActiveFlag_BTF(iic_bus->I2Cx))
-    {
-        if ((HAL_GetTick() - tickstart) > iic_bus->timeout_ms)
-        {
-            return IIC_TIMEOUT;
-        }
-    }
-
+    // ✅ 移除BTF等待，由数据应答函数处理
     return IIC_OK;
 }
 
@@ -129,11 +120,9 @@ iic_ll_status_t ll_iic_stop(iic_ll_bus_t* iic_bus)
 }
 
 /**
- * @brief  等待从机应答（ACK）
- * @param  iic_bus: I2C总线句柄
- * @retval iic_ll_status_t: 操作状态（IIC_OK=收到ACK，IIC_NOTACK=收到NACK）
+ * @brief  等待地址应答（发送从机地址后调用）
  */
-iic_ll_status_t ll_iic_wait_ack(iic_ll_bus_t* iic_bus)
+iic_ll_status_t ll_iic_wait_addr_ack(iic_ll_bus_t* iic_bus)
 {
     if (NULL == iic_bus || NULL == iic_bus->I2Cx)
         return IIC_NULL;
@@ -142,21 +131,49 @@ iic_ll_status_t ll_iic_wait_ack(iic_ll_bus_t* iic_bus)
 
     while (1)
     {
-        // 检查地址应答成功（ADDR标志：主模式发送地址后从机应答）
         if (LL_I2C_IsActiveFlag_ADDR(iic_bus->I2Cx))
         {
-            LL_I2C_ClearFlag_ADDR(iic_bus->I2Cx); // 清除ADDR标志（读SR1+SR2）
+            LL_I2C_ClearFlag_ADDR(iic_bus->I2Cx);
             return IIC_OK;
         }
 
-        // 检查应答失败（AF标志：从机无应答）
         if (LL_I2C_IsActiveFlag_AF(iic_bus->I2Cx))
         {
-            LL_I2C_ClearFlag_AF(iic_bus->I2Cx); // 清除AF标志
+            LL_I2C_ClearFlag_AF(iic_bus->I2Cx);
             return IIC_NOTACK;
         }
 
-        // 超时判断
+        if ((HAL_GetTick() - tickstart) > iic_bus->timeout_ms)
+        {
+            return IIC_TIMEOUT;
+        }
+    }
+}
+
+/**
+ * @brief  等待数据应答（发送数据字节后调用）
+ */
+iic_ll_status_t ll_iic_wait_data_ack(iic_ll_bus_t* iic_bus)
+{
+    if (NULL == iic_bus || NULL == iic_bus->I2Cx)
+        return IIC_NULL;
+
+    uint32_t tickstart = HAL_GetTick();
+
+    while (1)
+    {
+        // ✅ 关键修正：使用BTF而不是TXE
+        if (LL_I2C_IsActiveFlag_BTF(iic_bus->I2Cx))
+        {
+            return IIC_OK;
+        }
+
+        if (LL_I2C_IsActiveFlag_AF(iic_bus->I2Cx))
+        {
+            LL_I2C_ClearFlag_AF(iic_bus->I2Cx);
+            return IIC_NOTACK;
+        }
+
         if ((HAL_GetTick() - tickstart) > iic_bus->timeout_ms)
         {
             return IIC_TIMEOUT;
