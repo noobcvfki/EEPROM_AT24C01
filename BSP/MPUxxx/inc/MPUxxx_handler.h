@@ -1,0 +1,8 @@
+//
+// Created by capting on 2025/11/26.
+//
+
+#ifndef USER_MPUXXX_MPUXXX_HANDLER_H
+#define USER_MPUXXX_MPUXXX_HANDLER_H
+
+#endif //USER_MPUXXX_MPUXXX_HANDLER_H
