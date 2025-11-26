@@ -174,6 +174,7 @@ void mpuxxx_handler_thread(void* argument)
 NULL_ERROR:
     {
         LOG_ERROR("input api is null");
+        vTaskDelete(NULL);
         return;
     }
 
