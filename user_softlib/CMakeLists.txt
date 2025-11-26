@@ -6,6 +6,7 @@ add_library(softlib STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/DWT_delay.c
 #        ${CMAKE_CURRENT_SOURCE_DIR}/src/iic_ll.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/circular_buffer.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/unpack_task.c
 )
 
 # ------------------------------
@@ -14,6 +15,7 @@ add_library(softlib STATIC
 target_link_libraries(softlib PUBLIC
         stm32cubemx
         user_debug
+        BSP_MPUxxx
 )
 
 # （可选）暴露 debug 模块自身的头文件（若有）
