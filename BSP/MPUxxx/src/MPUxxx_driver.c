@@ -1065,6 +1065,12 @@ mpuxxx_status_t bsp_mpuxxx_driver_inst(
 
     ret = bsp_mpuxxx_driver_init(p_mpuxxx_driver);
     if (MPUxxx_OK != ret){LOG_ERROR("mpu init is ng");return MPUxxx_ERROR;}
+
+    callback_register(int_interrupt_callback);
+    callback_register_dma(dma_interrupt_callback);
+
+    g_is_init_flag = MPUXXX_INIT;
+    return ret;
 RETURN_ERROR:
     {
         log_e("bsp_mpuxxx_driver_inst");
