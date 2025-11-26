@@ -6,20 +6,22 @@
 #define USER_MPUXXX_MPUXXX_DRIVER_H
 //******************************** Includes *********************************//
 #include <stdint.h>
+#include "circular_buffer.h"
 //******************************** Includes *********************************//
 //---------------------------------------------------------------------------//
 //******************************** define   *********************************//
 /*   函数返回值    */
+//********************************** enum ************************************//
 typedef enum
 {
-    MPUxxx_OK             = 0,          /*Operation completed successfully   */
-    MPUxxx_ERROR          = 1,          /*Run-time error without case matched*/
-    MPUxxx_ERRORTIMEOUT   = 2,          /*Operation failed with timeout      */
-    MPUxxx_ERRORRESOURCE  = 3,          /*Resource not available             */
-    MPUxxx_ERRORPARAMETER = 4,          /*Parameter error                    */
-    MPUxxx_ERRORNOMEMORY  = 5,          /*Out of memory                      */
-    MPUxxx_ERRORISR       = 6,          /*Not allowed in ISR context         */
-    MPUxxx_RESERVED       = 0x7FFFFFFF, /*Reserved                           */
+    MPUxxx_OK             = 0,          //*操作执行成功
+    MPUxxx_ERROR          = 1,          //*无匹配场景的运行时错误
+    MPUxxx_ERRORTIMEOUT   = 2,          //*操作超时失败
+    MPUxxx_ERRORRESOURCE  = 3,          //*资源不可用
+    MPUxxx_ERRORPARAMETER = 4,          //*参数错误
+    MPUxxx_ERRORNOMEMORY  = 5,          //*内存不足
+    MPUxxx_ERRORISR       = 6,          //*不允许在ISR（中断服务程序）上下文使用
+    MPUxxx_RESERVED       = 0x7FFFFFFF, //*保留（预留）
 } mpuxxx_status_t;
 
 #define OS_SUPPORTING
@@ -276,4 +278,5 @@ mpuxxx_status_t bsp_mpuxxx_driver_inst(
 
 uint32_t mpuxxx_flag_read(void);
 void mpuxxx_flag_set(uint8_t flag);
+
 #endif //USER_MPUXXX_MPUXXX_DRIVER_H

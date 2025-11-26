@@ -82,14 +82,9 @@
     TIME_OUT_MS\
 )
 
-#ifdef DEBUG
-#undef DEBUG
-#define DEBUG
-#else
-#define DEBUG
-#endif
+#define MPUXXX_DRIVER_DEBUG
 
-#ifdef DEBUG
+#ifdef MPUXXX_DRIVER_DEBUG
 #define LOG_DEBUG(x,...)  log_d(x, ##__VA_ARGS__)
 #define LOG_ERROR(x,...)  log_e(x,##__VA_ARGS__)
 #else
@@ -115,6 +110,15 @@ static uint32_t g_is_dma_readed = 0;
 //---------------------------------------------------------------------------//
 //******************************* Functions *********************************//
 
+inline uint32_t mpuxxx_flag_read(void)
+{
+    return g_is_dma_readed;
+}
+
+inline void mpuxxx_flag_set(uint8_t flag)
+{
+    g_is_dma_readed = flag;
+}
 
 /**
  * @brief 使MPU进入睡眠模式
